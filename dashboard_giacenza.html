@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dashboard Giacenza - Genere Commerciale & Tema</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
+<style>
+:root{--bg:#f5f7fb;--panel:#fff;--ink:#182235;--muted:#687386;--line:#dde5f1;--accent:#2563eb;--accent2:#14b8a6;--good:#0f9f6e;--bad:#dc2626;--warn:#f59e0b;--soft:#eef4ff;--pink:#f8dbe8;--dark:#111827;}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;color:var(--ink)}
+.app{max-width:1480px;margin:0 auto;padding:26px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:22px;box-shadow:0 16px 40px rgba(18,35,61,.07)}
+.hero{display:grid;grid-template-columns:minmax(330px,1fr) auto minmax(180px,260px);align-items:center;gap:16px;margin-bottom:12px}.hero h1{font-size:21px;line-height:1.1;margin:0;font-weight:900;letter-spacing:-.03em}.hero p{margin:5px 0 0;color:var(--muted);font-size:13px}.hero-statusline{justify-self:center;display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 12px;color:var(--muted);font-size:11px;white-space:nowrap;box-shadow:0 6px 18px rgba(18,35,61,.04)}.brand{justify-self:end;text-align:right}.brand-logo{display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);background:linear-gradient(135deg,#fff,var(--pink));border-radius:14px;padding:10px 13px;font-weight:900;letter-spacing:.09em;color:#2c2c31}.brand-logo-img{display:block;width:185px;max-width:100%;height:auto;object-fit:contain}.version{display:block;font-size:10px;color:var(--muted);margin-top:4px}.drop-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}.dropzone{min-height:54px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:14px;border-style:dashed;transition:.2s;background:linear-gradient(180deg,#fff,#f9fbff);position:relative;overflow:hidden}.dropzone.dragover{border-color:var(--accent);box-shadow:0 0 0 4px rgba(37,99,235,.14);transform:translateY(-1px)}.drop-title{font-size:13px;font-weight:900}.drop-sub{font-size:11px;color:var(--muted);margin-top:2px}.drop-actions{display:flex;align-items:center;gap:8px;justify-content:flex-end;flex-wrap:wrap}.drop-btn{border:1px solid var(--line);background:#fff;border-radius:12px;padding:8px 11px;color:var(--ink);font-size:12px;font-weight:900;cursor:pointer}.dropzone input{display:none}.drop-status{font-size:10px;color:var(--muted);max-width:310px;text-align:right}.drop-status.ok{color:var(--good);font-weight:900}.drop-status.bad{color:var(--bad);font-weight:900}.drop-status.loading{color:var(--accent);font-weight:900}.filters{padding:10px;margin-bottom:12px;position:sticky;top:0;z-index:5}.filter-row{display:grid;grid-template-columns:repeat(5,minmax(120px,1fr));gap:7px;margin-bottom:7px}.filter-row:last-child{margin-bottom:0}.field label{display:block;font-size:9px;color:var(--muted);font-weight:900;margin:0 0 3px;text-transform:uppercase;letter-spacing:.04em}select,input{width:100%;border:1px solid var(--line);background:#fff;border-radius:10px;padding:6px 8px;color:var(--ink);font-size:11px;outline:none;min-height:28px}select:focus,input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.12)}button{border:0;background:var(--accent);color:white;border-radius:12px;padding:8px 12px;font-weight:800;cursor:pointer;font-size:12px}button.secondary{background:#eef4ff;color:#2450a6}.grid-kpi{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:12px}.kpi{padding:12px 14px;min-height:92px}.kpi .label{font-size:10px;color:var(--muted);font-weight:900;text-transform:uppercase;letter-spacing:.05em}.kpi .value{font-size:24px;font-weight:900;margin-top:6px;letter-spacing:-.03em}.kpi .sub{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.25}.kpi:nth-child(1){background:rgba(220,252,231,.68)}.kpi:nth-child(2){background:rgba(224,242,254,.68)}.kpi:nth-child(3){background:rgba(254,249,195,.66)}.kpi:nth-child(4){background:rgba(237,233,254,.64)}.kpi:nth-child(5){background:rgba(254,226,226,.48)}.tabs{display:flex;gap:8px;align-items:center;padding:8px;margin-bottom:14px;position:sticky;top:53px;z-index:4;flex-wrap:wrap}.tab{background:#fff;color:#2450a6;border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-size:12px;font-weight:900}.tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}.page{display:none}.page.active{display:block}.main{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}.chartbox,.tablebox{padding:18px;margin-bottom:14px;overflow:hidden}.chartbox h2,.tablebox h2{font-size:16px;margin:0 0 4px}.hint{font-size:12px;color:var(--muted);margin-bottom:13px}.svgwrap{width:100%;height:340px;overflow:auto;border:1px solid var(--line);border-radius:16px;background:#fff}svg{width:100%;height:100%;display:block}.axis{stroke:#d9e2ef;stroke-width:1}.bar{fill:var(--accent)}.bar2{fill:var(--accent2)}.barBad{fill:var(--bad)}.txt{font-size:11px;fill:#394456}.smalltxt{font-size:10px;fill:#6b7485}.tabletools{display:flex;gap:10px;justify-content:space-between;align-items:center;margin:8px 0 12px;flex-wrap:wrap}.tablewrap{overflow:auto;max-height:600px;border:1px solid var(--line);border-radius:16px}table{width:100%;border-collapse:separate;border-spacing:0;font-size:12px;min-width:1050px}th,td{padding:9px 10px;border-bottom:1px solid var(--line);border-right:1px solid #edf2f8;white-space:nowrap;text-align:right}th{position:sticky;top:0;background:#f8fbff;font-size:10px;color:#4d5a6d;text-transform:uppercase;letter-spacing:.04em;z-index:2;cursor:pointer;text-align:center!important}td:first-child,th:first-child,td:nth-child(2),th:nth-child(2),td:nth-child(3),th:nth-child(3){text-align:left}tbody tr:hover{background:#f8fbff}tfoot td{font-weight:900;background:#fcfdff}.pos{color:var(--good);font-weight:900}.neg{color:var(--bad);font-weight:900}.pill{display:inline-block;border-radius:999px;padding:4px 8px;background:#eef4ff;color:#2450a6;font-weight:800;font-size:11px}.note{font-size:11px;color:var(--muted);line-height:1.45;margin-top:10px}.empty{padding:28px;text-align:center;color:var(--muted);font-weight:800}.legend-grid{display:grid;grid-template-columns:repeat(4,minmax(160px,1fr));gap:10px}.legend-card{border:1px solid var(--line);border-radius:14px;background:#fff;padding:12px}.legend-code{font-weight:900;color:#2450a6;font-size:13px}.legend-desc{color:var(--muted);font-size:12px;margin-top:4px;line-height:1.35}.alert{padding:12px 14px;border-radius:16px;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;font-size:12px;font-weight:700;margin-bottom:12px}.right-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.mini{font-size:10px;padding:6px 9px;border-radius:10px}.pdf-button{background:#111827;color:#fff}.footer{font-size:10px;color:var(--muted);margin:16px 0 4px;text-align:right}
+@media(max-width:1100px){.hero,.drop-grid,.main{grid-template-columns:1fr}.brand{justify-self:start;text-align:left}.filter-row{grid-template-columns:repeat(2,1fr)}.grid-kpi{grid-template-columns:repeat(2,1fr)}.tabs{top:0}.legend-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:640px){.app{padding:14px}.filter-row,.grid-kpi{grid-template-columns:1fr}.legend-grid{grid-template-columns:1fr}}
+#itemsTable{min-width:2300px}
+#themeTable{min-width:1250px}
+#periodThemeTable{min-width:760px}
+#itemsTable th:nth-child(1),#itemsTable td:nth-child(1){position:sticky;left:0;background:#fff;z-index:3;box-shadow:8px 0 14px rgba(15,23,42,.06)}
+#itemsTable th:nth-child(1){background:#f8fbff;z-index:5}
+#itemsTable th:nth-child(2){position:sticky!important;top:0!important;background:#f8fbff!important;z-index:5!important;box-shadow:none!important}
+#itemsTable td:nth-child(2){position:static!important;left:auto!important;background:inherit;z-index:auto;box-shadow:none!important}
+.resa-cell{display:flex;align-items:center;justify-content:flex-end;gap:8px;min-width:105px}
+.resa-val{font-variant-numeric:tabular-nums;font-weight:900;min-width:44px;text-align:right}
+.resa-bar{position:relative;width:52px;height:8px;border-radius:999px;background:#fee2e2;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(15,23,42,.08)}
+.resa-bar i{display:block;height:100%;width:var(--w);background:linear-gradient(90deg,#dc2626,#f59e0b,#0f9f6e);border-radius:999px}
+.multi-dd{position:relative;width:100%}
+.multi-dd select{display:none}
+.multi-dd-button{width:100%;min-height:28px;padding:6px 30px 6px 8px;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:10px;text-align:left;font-size:11px;font-weight:500;position:relative;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.multi-dd-button:after{content:'▾';position:absolute;right:9px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:10px}
+.multi-dd.open .multi-dd-button{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+.multi-dd-panel{display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:80;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 18px 45px rgba(18,35,61,.16);padding:8px}
+.multi-dd.open .multi-dd-panel{display:block}
+.multi-dd-search{margin-bottom:7px;font-size:11px;height:28px;min-height:28px}
+.multi-dd-options{max-height:220px;overflow:auto;padding-right:2px}
+.multi-dd-option{display:flex;align-items:center;gap:7px;padding:6px 5px;border-radius:9px;font-size:11px;color:var(--ink);cursor:pointer;user-select:none}
+.multi-dd-option:hover{background:#f8fbff}
+.multi-dd-option input{width:13px;height:13px;min-height:13px;margin:0;accent-color:var(--accent)}
+.multi-dd-empty{padding:8px;color:var(--muted);font-size:11px;font-weight:700}
+
+.filter-toggle-bar{display:flex;justify-content:flex-end;margin:-2px 0 8px}.filter-toggle-bar button{background:#fff;color:#2450a6;border:1px solid var(--line);border-radius:999px;padding:7px 11px;font-size:11px;box-shadow:0 8px 18px rgba(18,35,61,.05)}.filters.filters-hidden{display:none!important}
+#themeTable th:nth-child(1),#themeTable td:nth-child(1){position:sticky;left:0;background:#fff;z-index:3;box-shadow:8px 0 14px rgba(15,23,42,.06)}
+#themeTable th:nth-child(1){background:#f8fbff;z-index:5}
+.small-filter-summary{font-size:11px!important;color:var(--muted);line-height:1.35;margin-bottom:12px}
+
+/* v2.8 chart layout and interactive tooltip: reduced vertical empty space */
+.svgwrap{position:relative;background:linear-gradient(180deg,#ffffff 0%,#fbfdff 100%)}
+.chartbox{min-height:430px}
+.chartbox .svgwrap{height:365px}
+.chart-bar{cursor:pointer;transition:opacity .16s ease,filter .16s ease}
+.chart-bar:hover{opacity:.88;filter:brightness(.94)}
+.chart-label{font-size:11px;fill:#273244;font-weight:800}
+.chart-value{font-size:11px;fill:#182235;font-weight:900}
+.chart-sub{font-size:9.5px;fill:#7b8798}
+.chart-grid{stroke:#eef3fa;stroke-width:1}
+.chart-axis-label{font-size:9.5px;fill:#7b8798}
+.chart-tooltip{position:fixed;z-index:99999;pointer-events:none;background:#111827;color:#fff;border-radius:12px;padding:9px 11px;box-shadow:0 14px 38px rgba(15,23,42,.24);font-size:11px;line-height:1.35;max-width:280px;opacity:0;transform:translate(-50%,-110%);transition:opacity .12s ease}
+.chart-tooltip strong{display:block;font-size:12px;margin-bottom:4px;color:#fff}
+.chart-tooltip span{display:block;color:#d1d5db}
+
+/* v2.9 Drive upload and Drive file selectors */
+.drive-select{min-width:210px;max-width:260px;height:30px!important;min-height:30px!important;padding:5px 8px!important;border-radius:10px!important;font-size:11px!important;background:#fff;border:1px solid var(--line);color:var(--ink)}
+.drop-actions .drive-select{display:inline-block}
+@media(max-width:900px){.drive-select{min-width:100%;max-width:100%}.drop-actions{justify-content:stretch}.drop-actions>*{flex:1}}
+
+
+/* v3.4 - filtro sempre visibile, grafici senza spazi interni e colonne ottimizzate */
+.filter-toggle-bar{position:fixed!important;top:12px!important;right:22px!important;z-index:1200!important;margin:0!important;display:flex!important;justify-content:flex-end!important;pointer-events:none!important}
+.filter-toggle-bar button{pointer-events:auto!important;backdrop-filter:blur(8px);background:rgba(255,255,255,.94)!important;box-shadow:0 12px 28px rgba(18,35,61,.14)!important}
+#page-charts .chartbox{padding:14px 16px 10px!important;display:flex!important;flex-direction:column!important;min-height:430px!important}
+#page-charts .chartbox h2{margin-bottom:3px!important}
+#page-charts .chartbox .hint{margin-bottom:6px!important;line-height:1.25!important}
+#page-charts .svgwrap{height:392px!important;min-height:392px!important;overflow:auto!important;display:block!important;align-items:stretch!important;justify-content:flex-start!important;padding:0!important}
+#page-charts .main .svgwrap{height:390px!important;min-height:390px!important}
+#page-charts svg{display:block!important;width:100%!important;margin:0!important;padding:0!important;vertical-align:top!important}
+#itemsTable{min-width:1980px!important;table-layout:auto!important}
+#themeTable{min-width:1080px!important;table-layout:auto!important}
+#itemsTable th,#itemsTable td,#themeTable th,#themeTable td{padding:7px 8px!important;line-height:1.12!important}
+#itemsTable th,#themeTable th{font-size:9.5px!important}
+#itemsTable th:first-child,#itemsTable td:first-child{min-width:145px!important;max-width:210px!important}
+#themeTable th:first-child,#themeTable td:first-child{min-width:210px!important;max-width:320px!important}
+#themeTable th:nth-child(2),#themeTable td:nth-child(2),#themeTable th:nth-child(4),#themeTable td:nth-child(4){min-width:118px!important}
+#itemsTable th:not(:first-child),#itemsTable td:not(:first-child){min-width:72px!important}
+#themeTable th:not(:first-child),#themeTable td:not(:first-child){min-width:78px!important}
+
+
+/* v4.4 report internal filters */
+.store-detail-filterbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;flex:1;min-width:420px}
+.store-detail-filterbar input{max-width:360px}
+.store-detail-filterbar select{width:auto;min-width:210px;max-width:290px}
+@media(max-width:900px){.store-detail-filterbar{min-width:100%;}.store-detail-filterbar input,.store-detail-filterbar select{max-width:100%;width:100%;}}
+
+/* v4.6 internal report multi-select filters */
+.store-detail-filterbar .multi-dd{width:auto;min-width:220px;max-width:310px;flex:0 1 260px}
+.store-detail-filterbar .multi-dd-button{height:28px;min-height:28px;padding-top:6px;padding-bottom:6px}
+.store-detail-filterbar .multi-dd-panel{z-index:150}
+@media(max-width:900px){.store-detail-filterbar .multi-dd{width:100%;max-width:100%;flex:1 1 100%;}}
+
+/* v5.0 - toggle filtri in posizione intermedia e sticky */
+.filter-toggle-bar{position:sticky!important;top:8px!important;right:auto!important;z-index:1200!important;margin:6px 0 8px!important;display:flex!important;justify-content:flex-end!important;pointer-events:none!important}
+.filter-toggle-bar button{pointer-events:auto!important;backdrop-filter:blur(8px);background:rgba(255,255,255,.96)!important;color:#2450a6!important;border:1px solid var(--line)!important;border-radius:999px!important;padding:7px 11px!important;font-size:11px!important;box-shadow:0 12px 28px rgba(18,35,61,.14)!important}
+#mainFilters{top:48px!important}
+
+
+/* v5.5 Data Quality */
+.dq-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:10px 0 12px}
+.dq-card{border:1px solid var(--line);border-radius:16px;background:#fff;padding:12px 14px;min-height:78px}
+.dq-card .label{font-size:10px;color:var(--muted);font-weight:900;text-transform:uppercase;letter-spacing:.05em}
+.dq-card .value{font-size:22px;font-weight:900;margin-top:5px;letter-spacing:-.02em}
+.dq-card .sub{font-size:10px;color:var(--muted);margin-top:3px;line-height:1.25}
+.dq-ok{color:var(--good)!important;font-weight:900}.dq-warn{color:var(--warn)!important;font-weight:900}.dq-bad{color:var(--bad)!important;font-weight:900}.dq-info{color:var(--accent)!important;font-weight:900}
+#dqTable{min-width:1180px}.dq-status{font-weight:900;text-transform:uppercase}.dq-row-ok td{background:#f0fdf4}.dq-row-warn td{background:#fffbeb}.dq-row-bad td{background:#fef2f2}.dq-row-info td{background:#eff6ff}
+@media(max-width:1100px){.dq-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:640px){.dq-grid{grid-template-columns:1fr}}
+
+
+/* v5.6 sticky report/header overlap protection */
+:root{--report-sticky-offset:132px;}
+.filters{z-index:1100!important;background:rgba(255,255,255,.98)!important;backdrop-filter:blur(6px)!important;}
+.tabs{z-index:1000!important;background:rgba(255,255,255,.98)!important;backdrop-filter:blur(6px)!important;}
+.tablebox{scroll-margin-top:var(--report-sticky-offset)!important;}
+.tablebox h2{scroll-margin-top:var(--report-sticky-offset)!important;}
+html{scroll-padding-top:var(--report-sticky-offset)!important;}
+
+/* v6.2 main filters as dynamic searchable multi-select */
+.filters .multi-dd-panel{z-index:220}
+.filters .multi-dd-button{height:28px;min-height:28px;padding-top:6px;padding-bottom:6px}
+.filters .multi-dd-options{max-height:260px}
+
+/* v6.3 filter/drive performance refinements */
+.multi-dd-actions{display:flex;gap:6px;margin:0 0 7px 0}
+.multi-dd-actions button{flex:1;border:1px solid var(--line);background:#f8fbff;color:#2450a6;border-radius:9px;padding:5px 6px;font-size:10px;font-weight:900}
+.multi-dd-actions button:hover{background:#eef4ff}
+.multi-dd-options{contain:content}
+.multi-dd-option span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* v6.6 upload naming modal */
+.upload-modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.42);display:none;align-items:center;justify-content:center;z-index:5000;padding:18px}
+.upload-modal-overlay.open{display:flex}
+.upload-modal{width:min(520px,100%);background:#fff;border:1px solid var(--line);border-radius:22px;box-shadow:0 28px 80px rgba(18,35,61,.28);padding:20px}
+.upload-modal h3{margin:0 0 6px;font-size:18px;font-weight:900;color:var(--ink)}
+.upload-modal .modal-sub{font-size:12px;color:var(--muted);line-height:1.4;margin-bottom:16px}
+.upload-modal-grid{display:grid;grid-template-columns:1fr 130px;gap:10px;margin-bottom:12px}
+.upload-modal label{display:block;font-size:10px;color:var(--muted);font-weight:900;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+.upload-modal-preview{border:1px solid var(--line);background:#f8fbff;border-radius:14px;padding:11px 12px;font-size:12px;color:var(--ink);font-weight:800;word-break:break-all;margin-bottom:14px}
+.upload-modal-actions{display:flex;justify-content:flex-end;gap:8px}
+.upload-modal-actions .secondary{background:#eef4ff;color:#2450a6}
+@media(max-width:640px){.upload-modal-grid{grid-template-columns:1fr}.upload-modal-actions{flex-direction:column-reverse}.upload-modal-actions button{width:100%}}
+</style>
+</head>
+<body>
+<div class="upload-modal-overlay" id="uploadNameModalOverlay" aria-hidden="true"><div class="upload-modal" role="dialog" aria-modal="true" aria-labelledby="uploadNameModalTitle"><h3 id="uploadNameModalTitle">Salvataggio file su Drive</h3><div class="modal-sub">Inserisci data e stagione: il file verrà salvato su Drive con il nome commerciale generato automaticamente.</div><div class="upload-modal-grid"><div><label for="uploadNameDate">Data</label><input id="uploadNameDate" type="date"></div><div><label for="uploadNameSeason">Stagione</label><select id="uploadNameSeason"><option value="PE">PE</option><option value="AI">AI</option></select></div></div><label>Nome file generato</label><div class="upload-modal-preview" id="uploadNamePreview">-</div><div class="upload-modal-actions"><button type="button" class="secondary" id="uploadNameCancel">Annulla</button><button type="button" id="uploadNameConfirm">Conferma e carica</button></div></div></div>
+<div class="app">
+  <div class="hero">
+    <div><h1>Dashboard Giacenza - Genere Commerciale & Tema</h1></div>
+    <div class="hero-statusline"><span>Stato: <strong id="globalStatus">carica i file</strong></span><span>Record: <strong id="recordCount">0</strong></span><span>Aggiornato: <strong id="updatedAt">-</strong></span></div>
+    <div class="brand"><img class="brand-logo-img" src="data:image/png;base64,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" alt="Fiorella Rubino"><span class="version">Giacenza Dashboard v6.9</span></div>
+  </div>
+
+  <div class="drop-grid">
+    <div class="dropzone panel" id="stockDropzone">
+      <div><div class="drop-title">Carica GIACENZA</div><div class="drop-sub"></div></div>
+      <div class="drop-actions"><select id="stockDriveSelect" class="drive-select" title="Seleziona un file GIACENZA da Drive"><option value="">Drive: carica elenco…</option></select><label class="drop-btn" for="stockFileInput">Seleziona file</label><input id="stockFileInput" type="file" accept=".xlsx,.xls,.xlsm"><div class="drop-status" id="stockStatus">Nessun file caricato</div></div>
+    </div>
+    <div class="dropzone panel" id="dbDropzone">
+      <div><div class="drop-title">Carica DBINFO</div><div class="drop-sub"></div></div>
+      <div class="drop-actions"><select id="dbDriveSelect" class="drive-select" title="Seleziona un file DBINFO da Drive"><option value="">Drive: carica elenco…</option></select><label class="drop-btn" for="dbFileInput">Seleziona DBINFO</label><input id="dbFileInput" type="file" accept=".xlsx,.xls,.xlsm"><div class="drop-status" id="dbStatus">Nessun file caricato</div></div>
+    </div>
+  </div>
+
+  <div class="filter-toggle-bar"><button id="toggleFilters" type="button">👁 Nascondi filtri</button></div>
+  <div class="filters panel" id="mainFilters">
+    <div class="filter-row">
+      <div class="field"><label>Negozio</label><div class="multi-dd" id="storeDropdown"><button type="button" class="multi-dd-button" id="storeDropdownButton">Seleziona negozi</button><div class="multi-dd-panel" id="storeDropdownPanel"><input id="storeMultiSearch" class="multi-dd-search" placeholder="Cerca negozio..."/><div class="multi-dd-options" id="storeOptions"></div></div><select id="storeFilter" multiple></select></div></div>
+      <div class="field"><label>Distretto</label><div class="multi-dd" id="districtDropdown"><button type="button" class="multi-dd-button" id="districtDropdownButton">Seleziona distretti</button><div class="multi-dd-panel" id="districtDropdownPanel"><input id="districtSearch" class="multi-dd-search" placeholder="Cerca distretto..."/><div class="multi-dd-options" id="districtOptions"></div></div><select id="districtFilter" multiple></select></div></div>
+      <div class="field"><label>Metrica grafici</label><select id="metricFilter"></select></div>
+      <div class="field"><label>Grade</label><div class="multi-dd" id="gradeFilterDropdown"><button type="button" class="multi-dd-button" id="gradeFilterDropdownButton">Tutti</button><div class="multi-dd-panel"><input id="gradeFilterSearch" class="multi-dd-search" placeholder="Cerca grade..."/><div class="multi-dd-options" id="gradeFilterOptions"></div></div><select id="gradeFilter" multiple></select></div></div>
+      <div class="field"><label>Cluster</label><div class="multi-dd" id="clusterFilterDropdown"><button type="button" class="multi-dd-button" id="clusterFilterDropdownButton">Tutti</button><div class="multi-dd-panel"><input id="clusterFilterSearch" class="multi-dd-search" placeholder="Cerca cluster..."/><div class="multi-dd-options" id="clusterFilterOptions"></div></div><select id="clusterFilter" multiple></select></div></div>
+    </div>
+    <div class="filter-row">
+      <div class="field"><label>Tipo</label><div class="multi-dd" id="tipoStoreFilterDropdown"><button type="button" class="multi-dd-button" id="tipoStoreFilterDropdownButton">Tutti</button><div class="multi-dd-panel"><input id="tipoStoreFilterSearch" class="multi-dd-search" placeholder="Cerca tipo..."/><div class="multi-dd-options" id="tipoStoreFilterOptions"></div></div><select id="tipoStoreFilter" multiple></select></div></div>
+      <div class="field"><label>SFS</label><div class="multi-dd" id="sfsFilterDropdown"><button type="button" class="multi-dd-button" id="sfsFilterDropdownButton">Tutti</button><div class="multi-dd-panel"><input id="sfsFilterSearch" class="multi-dd-search" placeholder="Cerca SFS..."/><div class="multi-dd-options" id="sfsFilterOptions"></div></div><select id="sfsFilter" multiple></select></div></div>
+      <div class="field"><label>Ranking</label><div class="multi-dd" id="rankingFilterDropdown"><button type="button" class="multi-dd-button" id="rankingFilterDropdownButton">Tutti</button><div class="multi-dd-panel"><input id="rankingFilterSearch" class="multi-dd-search" placeholder="Cerca ranking..."/><div class="multi-dd-options" id="rankingFilterOptions"></div></div><select id="rankingFilter" multiple></select></div></div>
+      <div class="field"><label>Rating CC</label><div class="multi-dd" id="ratingCcFilterDropdown"><button type="button" class="multi-dd-button" id="ratingCcFilterDropdownButton">Tutti</button><div class="multi-dd-panel"><input id="ratingCcFilterSearch" class="multi-dd-search" placeholder="Cerca Rating CC..."/><div class="multi-dd-options" id="ratingCcFilterOptions"></div></div><select id="ratingCcFilter" multiple></select></div></div>
+      <div class="field"><label>TEST</label><div class="multi-dd" id="testFilterDropdown"><button type="button" class="multi-dd-button" id="testFilterDropdownButton">Tutti</button><div class="multi-dd-panel"><input id="testFilterSearch" class="multi-dd-search" placeholder="Cerca TEST..."/><div class="multi-dd-options" id="testFilterOptions"></div></div><select id="testFilter" multiple></select></div></div>
+      <div class="field"><label>Regione</label><div class="multi-dd" id="regioneFilterDropdown"><button type="button" class="multi-dd-button" id="regioneFilterDropdownButton">Tutti</button><div class="multi-dd-panel"><input id="regioneFilterSearch" class="multi-dd-search" placeholder="Cerca regione..."/><div class="multi-dd-options" id="regioneFilterOptions"></div></div><select id="regioneFilter" multiple></select></div></div>
+      <div class="field"><label>Categoria / Famiglia</label><div class="multi-dd" id="categoryFilterDropdown"><button type="button" class="multi-dd-button" id="categoryFilterDropdownButton">Tutti</button><div class="multi-dd-panel"><input id="categoryFilterSearch" class="multi-dd-search" placeholder="Cerca categoria..."/><div class="multi-dd-options" id="categoryFilterOptions"></div></div><select id="categoryFilter" multiple></select></div></div>
+    </div>
+    <div class="filter-row" style="grid-template-columns:minmax(120px,1fr)">
+      <div class="field"><label>&nbsp;</label><button class="secondary" id="resetFilters" style="width:100%">Reset filtri</button></div>
+    </div>
+  </div>
+
+  <div class="grid-kpi">
+    <div class="kpi panel"><div class="label" id="kpi1Label">Totale AC</div><div class="value" id="kTotalAc">-</div><div class="sub" id="kTotalAcSub">-</div></div>
+    <div class="kpi panel"><div class="label">Totale AP</div><div class="value" id="kTotalAp">-</div><div class="sub" id="kTotalApSub">Disponibile sul Genere Commerciale</div></div>
+    <div class="kpi panel"><div class="label">Delta AC/AP</div><div class="value" id="kDelta">-</div><div class="sub" id="kDeltaSub">Variazione aggregata</div></div>
+    <div class="kpi panel"><div class="label" id="kStoresLabel">SELL-THROUGH AC</div><div class="value" id="kStores">-</div><div class="sub" id="kStoresSub">SOU AP / SOU Delta</div></div>
+    <div class="kpi panel"><div class="label" id="kItemsLabel">VENDUTO U7</div><div class="value" id="kItems">-</div><div class="sub" id="kItemsSub">QVE7 AP / QVE7 Delta</div></div>
+  </div>
+
+  <div class="tabs panel">
+    <button class="tab active" data-page="page-charts">Grafici</button>
+    <button class="tab" data-page="page-stores">Distretti/Negozi</button>
+    <button class="tab" data-page="page-other-analysis">Altre analisi</button>
+    <button class="tab" data-page="page-items">Dettaglio categoria</button>
+    <button class="tab" data-page="page-themes">Dettaglio temi</button>
+    <button class="tab" data-page="page-period">Analisi periodo</button>
+    <button class="tab" data-page="page-legend">Legenda</button>
+    <span class="pill" id="activeDatasetPill">Dataset: vuoto</span>
+  </div>
+
+  <section id="page-charts" class="page active">
+    <div id="loadAlert" class="alert">Carica prima il file GIACENZA e poi DBINFO. La dashboard può funzionare anche senza DBINFO, ma i filtri Grade, Cluster, Tipo, SFS, Ranking e Regione resteranno vuoti.</div>
+    <div class="main">
+      <div class="chartbox panel"><h2>TOP CATEGORIA</h2><div class="hint">Tutte le categorie pesate sulla base della selezione del filtro Metrica Grafici.</div><div class="svgwrap"><svg id="itemChart"></svg></div></div>
+      <div class="chartbox panel"><h2>Top negozi</h2><div class="hint">Classifica negozi sulla metrica selezionata, dopo l'applicazione dei filtri.</div><div class="svgwrap"><svg id="storeChart"></svg></div></div>
+    </div>
+    <div class="main">
+      <div class="chartbox panel"><h2>Confronto distretti</h2><div class="hint">Aggregazione per DM / distretto commerciale.</div><div class="svgwrap"><svg id="districtChart"></svg></div></div>
+      <div class="chartbox panel"><h2>TOP TEMA</h2><div class="hint">Tutti i temi pesati sulla base della selezione del filtro Metrica Grafici.</div><div class="svgwrap"><svg id="typeChart"></svg></div></div>
+    </div>
+    <div class="tablebox panel"><h2>Data Quality</h2><div class="hint">Controlli automatici su coerenza dati, legenda, DBINFO e algoritmi di calcolo. I controlli considerano i filtri principali attivi, ignorando solo il filtro Metrica Grafici per verificare tutti i tipi dato.</div><div class="dq-grid" id="dqSummary"></div><div class="tablewrap" style="max-height:360px"><table id="dqTable"><thead></thead><tbody></tbody></table></div></div>
+  </section>
+
+  <section id="page-items" class="page">
+    <div class="tablebox panel"><h2>Dettaglio categoria</h2><div class="hint small-filter-summary" id="categoryFilterSummary">Filtri: tutti</div><div class="tabletools"><input id="itemTableSearch" placeholder="Cerca nella tabella categoria..." style="max-width:420px"><div class="right-actions"><button class="mini" id="exportItemsExcel">Esporta Excel</button><button class="mini pdf-button" id="exportItemsPdf">Esporta PDF</button></div></div><div class="tablewrap"><table id="itemsTable"><thead></thead><tbody></tbody><tfoot></tfoot></table></div></div>
+  </section>
+
+  <section id="page-period" class="page">
+    <div class="tablebox panel"><h2>Analisi periodo - categoria</h2><div class="hint small-filter-summary" id="periodFilterSummary">Filtri: tutti</div><div class="tabletools"><input id="periodTableSearch" placeholder="Cerca nella tabella analisi periodo categoria..." style="max-width:420px"><div class="right-actions"><button class="mini" id="exportPeriodExcel">Esporta Excel</button><button class="mini pdf-button" id="exportPeriodPdf">Esporta PDF</button></div></div><div class="tablewrap"><table id="periodTable"><thead></thead><tbody></tbody><tfoot></tfoot></table></div></div>
+    <div class="tablebox panel"><h2>Analisi periodo - Tema</h2><div class="hint small-filter-summary" id="periodThemeFilterSummary">Filtri: tutti</div><div class="tabletools"><input id="periodThemeTableSearch" placeholder="Cerca nella tabella analisi periodo tema..." style="max-width:420px"><div class="right-actions"><button class="mini" id="exportPeriodThemeExcel">Esporta Excel</button><button class="mini pdf-button" id="exportPeriodThemePdf">Esporta PDF</button></div></div><div class="tablewrap"><table id="periodThemeTable"><thead></thead><tbody></tbody><tfoot></tfoot></table></div></div>
+  </section>
+
+  <section id="page-themes" class="page">
+    <div class="tablebox panel"><h2>Dettaglio temi</h2><div class="hint small-filter-summary" id="themeFilterSummary">Filtri: tutti</div><div class="tabletools"><input id="themeTableSearch" placeholder="Cerca nella tabella tema..." style="max-width:420px"><div class="right-actions"><button class="mini" id="exportThemesExcel">Esporta Excel</button><button class="mini pdf-button" id="exportThemesPdf">Esporta PDF</button></div></div><div class="tablewrap"><table id="themeTable"><thead></thead><tbody></tbody><tfoot></tfoot></table></div></div>
+  </section>
+
+  <section id="page-stores" class="page">
+    <div class="tablebox panel"><h2>Dettaglio distretti</h2><div class="hint small-filter-summary" id="districtDetailFilterSummary">Filtri: tutti</div><div class="tabletools"><div class="store-detail-filterbar"><input id="districtDetailTableSearch" placeholder="Cerca nella tabella distretti..."><div class="multi-dd" id="districtDetailCategoryDropdown"><button type="button" class="multi-dd-button" id="districtDetailCategoryDropdownButton">Categoria: tutte</button><div class="multi-dd-panel" id="districtDetailCategoryDropdownPanel"><input id="districtDetailCategorySearch" class="multi-dd-search" placeholder="Cerca categoria..."><div class="multi-dd-options" id="districtDetailCategoryOptions"></div></div><select id="districtDetailCategoryFilter" multiple></select></div><div class="multi-dd" id="districtDetailThemeDropdown"><button type="button" class="multi-dd-button" id="districtDetailThemeDropdownButton">Tema: tutti</button><div class="multi-dd-panel" id="districtDetailThemeDropdownPanel"><input id="districtDetailThemeSearch" class="multi-dd-search" placeholder="Cerca tema..."><div class="multi-dd-options" id="districtDetailThemeOptions"></div></div><select id="districtDetailThemeFilter" multiple></select></div></div><div class="right-actions"><button class="mini" id="exportDistrictDetailExcel">Esporta Excel</button><button class="mini pdf-button" id="exportDistrictDetailPdf">Esporta PDF</button></div></div><div class="tablewrap"><table id="districtDetailTable"><thead></thead><tbody></tbody><tfoot></tfoot></table></div></div>
+    <div class="tablebox panel"><h2>Dettaglio negozi</h2><div class="hint small-filter-summary" id="storeDetailFilterSummary">Filtri: tutti</div><div class="tabletools"><div class="store-detail-filterbar"><input id="storeDetailTableSearch" placeholder="Cerca nella tabella negozi..."><div class="multi-dd" id="storeDetailCategoryDropdown"><button type="button" class="multi-dd-button" id="storeDetailCategoryDropdownButton">Categoria: tutte</button><div class="multi-dd-panel" id="storeDetailCategoryDropdownPanel"><input id="storeDetailCategorySearch" class="multi-dd-search" placeholder="Cerca categoria..."><div class="multi-dd-options" id="storeDetailCategoryOptions"></div></div><select id="storeDetailCategoryFilter" multiple></select></div><div class="multi-dd" id="storeDetailThemeDropdown"><button type="button" class="multi-dd-button" id="storeDetailThemeDropdownButton">Tema: tutti</button><div class="multi-dd-panel" id="storeDetailThemeDropdownPanel"><input id="storeDetailThemeSearch" class="multi-dd-search" placeholder="Cerca tema..."><div class="multi-dd-options" id="storeDetailThemeOptions"></div></div><select id="storeDetailThemeFilter" multiple></select></div></div><div class="right-actions"><button class="mini" id="exportStoreDetailExcel">Esporta Excel</button><button class="mini pdf-button" id="exportStoreDetailPdf">Esporta PDF</button></div></div><div class="tablewrap"><table id="storeDetailTable"><thead></thead><tbody></tbody><tfoot></tfoot></table></div></div>
+  </section>
+
+
+  <section id="page-other-analysis" class="page">
+    <div class="tablebox panel"><h2>Grade</h2><div class="hint small-filter-summary" id="gradeDetailFilterSummary">Filtri: tutti</div><div class="tabletools"><div class="store-detail-filterbar"><input id="gradeDetailTableSearch" placeholder="Cerca nella tabella grade..."><div class="multi-dd" id="gradeDetailCategoryDropdown"><button type="button" class="multi-dd-button" id="gradeDetailCategoryDropdownButton">Categoria: tutte</button><div class="multi-dd-panel" id="gradeDetailCategoryDropdownPanel"><input id="gradeDetailCategorySearch" class="multi-dd-search" placeholder="Cerca categoria..."><div class="multi-dd-options" id="gradeDetailCategoryOptions"></div></div><select id="gradeDetailCategoryFilter" multiple></select></div><div class="multi-dd" id="gradeDetailThemeDropdown"><button type="button" class="multi-dd-button" id="gradeDetailThemeDropdownButton">Tema: tutti</button><div class="multi-dd-panel" id="gradeDetailThemeDropdownPanel"><input id="gradeDetailThemeSearch" class="multi-dd-search" placeholder="Cerca tema..."><div class="multi-dd-options" id="gradeDetailThemeOptions"></div></div><select id="gradeDetailThemeFilter" multiple></select></div></div><div class="right-actions"><button class="mini" id="exportGradeDetailExcel">Esporta Excel</button><button class="mini pdf-button" id="exportGradeDetailPdf">Esporta PDF</button></div></div><div class="tablewrap"><table id="gradeDetailTable"><thead></thead><tbody></tbody><tfoot></tfoot></table></div></div>
+    <div class="tablebox panel"><h2>Tipo</h2><div class="hint small-filter-summary" id="tipoDetailFilterSummary">Filtri: tutti</div><div class="tabletools"><div class="store-detail-filterbar"><input id="tipoDetailTableSearch" placeholder="Cerca nella tabella tipo..."><div class="multi-dd" id="tipoDetailCategoryDropdown"><button type="button" class="multi-dd-button" id="tipoDetailCategoryDropdownButton">Categoria: tutte</button><div class="multi-dd-panel" id="tipoDetailCategoryDropdownPanel"><input id="tipoDetailCategorySearch" class="multi-dd-search" placeholder="Cerca categoria..."><div class="multi-dd-options" id="tipoDetailCategoryOptions"></div></div><select id="tipoDetailCategoryFilter" multiple></select></div><div class="multi-dd" id="tipoDetailThemeDropdown"><button type="button" class="multi-dd-button" id="tipoDetailThemeDropdownButton">Tema: tutti</button><div class="multi-dd-panel" id="tipoDetailThemeDropdownPanel"><input id="tipoDetailThemeSearch" class="multi-dd-search" placeholder="Cerca tema..."><div class="multi-dd-options" id="tipoDetailThemeOptions"></div></div><select id="tipoDetailThemeFilter" multiple></select></div></div><div class="right-actions"><button class="mini" id="exportTipoDetailExcel">Esporta Excel</button><button class="mini pdf-button" id="exportTipoDetailPdf">Esporta PDF</button></div></div><div class="tablewrap"><table id="tipoDetailTable"><thead></thead><tbody></tbody><tfoot></tfoot></table></div></div>
+    <div class="tablebox panel"><h2>SFS</h2><div class="hint small-filter-summary" id="sfsDetailFilterSummary">Filtri: tutti</div><div class="tabletools"><div class="store-detail-filterbar"><input id="sfsDetailTableSearch" placeholder="Cerca nella tabella SFS..."><div class="multi-dd" id="sfsDetailCategoryDropdown"><button type="button" class="multi-dd-button" id="sfsDetailCategoryDropdownButton">Categoria: tutte</button><div class="multi-dd-panel" id="sfsDetailCategoryDropdownPanel"><input id="sfsDetailCategorySearch" class="multi-dd-search" placeholder="Cerca categoria..."><div class="multi-dd-options" id="sfsDetailCategoryOptions"></div></div><select id="sfsDetailCategoryFilter" multiple></select></div><div class="multi-dd" id="sfsDetailThemeDropdown"><button type="button" class="multi-dd-button" id="sfsDetailThemeDropdownButton">Tema: tutti</button><div class="multi-dd-panel" id="sfsDetailThemeDropdownPanel"><input id="sfsDetailThemeSearch" class="multi-dd-search" placeholder="Cerca tema..."><div class="multi-dd-options" id="sfsDetailThemeOptions"></div></div><select id="sfsDetailThemeFilter" multiple></select></div></div><div class="right-actions"><button class="mini" id="exportSfsDetailExcel">Esporta Excel</button><button class="mini pdf-button" id="exportSfsDetailPdf">Esporta PDF</button></div></div><div class="tablewrap"><table id="sfsDetailTable"><thead></thead><tbody></tbody><tfoot></tfoot></table></div></div>
+    <div class="tablebox panel"><h2>Ranking</h2><div class="hint small-filter-summary" id="rankingDetailFilterSummary">Filtri: tutti</div><div class="tabletools"><div class="store-detail-filterbar"><input id="rankingDetailTableSearch" placeholder="Cerca nella tabella ranking..."><div class="multi-dd" id="rankingDetailCategoryDropdown"><button type="button" class="multi-dd-button" id="rankingDetailCategoryDropdownButton">Categoria: tutte</button><div class="multi-dd-panel" id="rankingDetailCategoryDropdownPanel"><input id="rankingDetailCategorySearch" class="multi-dd-search" placeholder="Cerca categoria..."><div class="multi-dd-options" id="rankingDetailCategoryOptions"></div></div><select id="rankingDetailCategoryFilter" multiple></select></div><div class="multi-dd" id="rankingDetailThemeDropdown"><button type="button" class="multi-dd-button" id="rankingDetailThemeDropdownButton">Tema: tutti</button><div class="multi-dd-panel" id="rankingDetailThemeDropdownPanel"><input id="rankingDetailThemeSearch" class="multi-dd-search" placeholder="Cerca tema..."><div class="multi-dd-options" id="rankingDetailThemeOptions"></div></div><select id="rankingDetailThemeFilter" multiple></select></div></div><div class="right-actions"><button class="mini" id="exportRankingDetailExcel">Esporta Excel</button><button class="mini pdf-button" id="exportRankingDetailPdf">Esporta PDF</button></div></div><div class="tablewrap"><table id="rankingDetailTable"><thead></thead><tbody></tbody><tfoot></tfoot></table></div></div>
+    <div class="tablebox panel"><h2>Rating CC</h2><div class="hint small-filter-summary" id="ratingCcDetailFilterSummary">Filtri: tutti</div><div class="tabletools"><div class="store-detail-filterbar"><input id="ratingCcDetailTableSearch" placeholder="Cerca nella tabella Rating CC..."><div class="multi-dd" id="ratingCcDetailCategoryDropdown"><button type="button" class="multi-dd-button" id="ratingCcDetailCategoryDropdownButton">Categoria: tutte</button><div class="multi-dd-panel" id="ratingCcDetailCategoryDropdownPanel"><input id="ratingCcDetailCategorySearch" class="multi-dd-search" placeholder="Cerca categoria..."><div class="multi-dd-options" id="ratingCcDetailCategoryOptions"></div></div><select id="ratingCcDetailCategoryFilter" multiple></select></div><div class="multi-dd" id="ratingCcDetailThemeDropdown"><button type="button" class="multi-dd-button" id="ratingCcDetailThemeDropdownButton">Tema: tutti</button><div class="multi-dd-panel" id="ratingCcDetailThemeDropdownPanel"><input id="ratingCcDetailThemeSearch" class="multi-dd-search" placeholder="Cerca tema..."><div class="multi-dd-options" id="ratingCcDetailThemeOptions"></div></div><select id="ratingCcDetailThemeFilter" multiple></select></div></div><div class="right-actions"><button class="mini" id="exportRatingCcDetailExcel">Esporta Excel</button><button class="mini pdf-button" id="exportRatingCcDetailPdf">Esporta PDF</button></div></div><div class="tablewrap"><table id="ratingCcDetailTable"><thead></thead><tbody></tbody><tfoot></tfoot></table></div></div>
+    <div class="tablebox panel"><h2>TEST</h2><div class="hint small-filter-summary" id="testDetailFilterSummary">Filtri: tutti</div><div class="tabletools"><div class="store-detail-filterbar"><input id="testDetailTableSearch" placeholder="Cerca nella tabella TEST..."><div class="multi-dd" id="testDetailCategoryDropdown"><button type="button" class="multi-dd-button" id="testDetailCategoryDropdownButton">Categoria: tutte</button><div class="multi-dd-panel" id="testDetailCategoryDropdownPanel"><input id="testDetailCategorySearch" class="multi-dd-search" placeholder="Cerca categoria..."><div class="multi-dd-options" id="testDetailCategoryOptions"></div></div><select id="testDetailCategoryFilter" multiple></select></div><div class="multi-dd" id="testDetailThemeDropdown"><button type="button" class="multi-dd-button" id="testDetailThemeDropdownButton">Tema: tutti</button><div class="multi-dd-panel" id="testDetailThemeDropdownPanel"><input id="testDetailThemeSearch" class="multi-dd-search" placeholder="Cerca tema..."><div class="multi-dd-options" id="testDetailThemeOptions"></div></div><select id="testDetailThemeFilter" multiple></select></div></div><div class="right-actions"><button class="mini" id="exportTestDetailExcel">Esporta Excel</button><button class="mini pdf-button" id="exportTestDetailPdf">Esporta PDF</button></div></div><div class="tablewrap"><table id="testDetailTable"><thead></thead><tbody></tbody><tfoot></tfoot></table></div></div>
+    <div class="tablebox panel"><h2>Regione</h2><div class="hint small-filter-summary" id="regioneDetailFilterSummary">Filtri: tutti</div><div class="tabletools"><div class="store-detail-filterbar"><input id="regioneDetailTableSearch" placeholder="Cerca nella tabella regione..."><div class="multi-dd" id="regioneDetailCategoryDropdown"><button type="button" class="multi-dd-button" id="regioneDetailCategoryDropdownButton">Categoria: tutte</button><div class="multi-dd-panel" id="regioneDetailCategoryDropdownPanel"><input id="regioneDetailCategorySearch" class="multi-dd-search" placeholder="Cerca categoria..."><div class="multi-dd-options" id="regioneDetailCategoryOptions"></div></div><select id="regioneDetailCategoryFilter" multiple></select></div><div class="multi-dd" id="regioneDetailThemeDropdown"><button type="button" class="multi-dd-button" id="regioneDetailThemeDropdownButton">Tema: tutti</button><div class="multi-dd-panel" id="regioneDetailThemeDropdownPanel"><input id="regioneDetailThemeSearch" class="multi-dd-search" placeholder="Cerca tema..."><div class="multi-dd-options" id="regioneDetailThemeOptions"></div></div><select id="regioneDetailThemeFilter" multiple></select></div></div><div class="right-actions"><button class="mini" id="exportRegioneDetailExcel">Esporta Excel</button><button class="mini pdf-button" id="exportRegioneDetailPdf">Esporta PDF</button></div></div><div class="tablewrap"><table id="regioneDetailTable"><thead></thead><tbody></tbody><tfoot></tfoot></table></div></div>
+  </section>
+
+  <section id="page-legend" class="page">
+    <div class="tablebox panel"><h2>Legenda decodifica</h2><div class="hint">Decodifica delle voci Tipo Dato presente nel foglio Legenda del file GIACENZA.</div><div id="legendGrid" class="legend-grid"></div></div>
+  </section>
+  <div class="footer">Dashboard HTML locale con salvataggio file su Google Drive tramite Web App Apps Script.</div>
+</div>
+<script>
+const DASHBOARD_VERSION='v6.9';
+const DRIVE_UPLOAD_ENDPOINT='https://script.google.com/macros/s/AKfycbzgLlv-d1LcJzNZPJIIyXXh0HuRyCaHVxSq-UXylziVUppGTRDVzkbK4BbP-g1fnzrTNw/exec';
+const DRIVE_CACHE_TTL=120000;
+const driveListCache={};
+const driveFileCache=new Map();
+const DEFAULT_DISTRICTS=['BRUNELLA CUCCINIELLO','LORENZO RICCOMI','SALVATORE SALIERNO','VERONICA GIUNTINI','MARILENA CANNI'];
+const DEFAULT_DISTRICT_ALIASES={'BRUNELLA CUCCINELLO':'BRUNELLA CUCCINIELLO'};
+const state={stockRecords:[],prevStockRecords:[],legend:{},dbMap:new Map(),dbNameMap:new Map(),dbRows:[],sort:{items:['QVE7_delta','desc'],period:['VEN_ac','desc'],periodTheme:['VEN_ac','desc'],themes:['QVE7_ac','desc'],stores:['ac','desc'],districtDetail:['QVE7_delta','desc'],gradeDetail:['QVE7_delta','desc'],tipoDetail:['QVE7_delta','desc'],sfsDetail:['QVE7_delta','desc'],rankingDetail:['QVE7_delta','desc'],ratingCcDetail:['QVE7_delta','desc'],testDetail:['QVE7_delta','desc'],regioneDetail:['QVE7_delta','desc'],storeDetail:['QVE7_delta','desc']},filtersReady:false,districtDefaultApplied:false,lastFileNames:{stock:null,prevStock:null,db:null}};
+const $=id=>document.getElementById(id);
+const filterIds=['storeFilter','districtFilter','gradeFilter','clusterFilter','tipoStoreFilter','sfsFilter','rankingFilter','ratingCcFilter','testFilter','regioneFilter','categoryFilter'];
+function norm(v){return (v??'').toString().trim().replace(/\s+/g,' ')}
+function keyCode(v){let s=norm(v).replace(/[^0-9]/g,''); return s.replace(/^0+/,'')||s;}
+function toNum(v){if(v===null||v===undefined||v==='')return 0;if(typeof v==='number')return Number.isFinite(v)?v:0;let s=String(v).replace(/\s/g,'').replace('%','').replace(/\./g,'').replace(',','.');let n=Number(s);return Number.isFinite(n)?n:0;}
+function hasValue(v){return v!==null&&v!==undefined&&norm(v)!=='';}
+function fmtInt(n){return Math.round(n||0).toLocaleString('it-IT');}
+function fmtNum(n,d=1){return (n||0).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d});}
+function fmtDec(n,d=1){return Number.isFinite(Number(n))?Number(n).toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d}):'ND';}
+function fmtPerc(n){if(!Number.isFinite(n))return 'ND';return (n*100).toLocaleString('it-IT',{minimumFractionDigits:1,maximumFractionDigits:1})+'%';}
+function escapeHtml(s){return norm(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
+function setStatus(id,msg,cls=''){const el=$(id);el.className='drop-status '+cls;el.textContent=msg;}
+let filterRenderTimer=null;let filterRenderRaf=null;
+function scheduleFilterRender(){clearTimeout(filterRenderTimer);filterRenderTimer=setTimeout(()=>{if(filterRenderRaf)cancelAnimationFrame(filterRenderRaf);filterRenderRaf=requestAnimationFrame(()=>{state.filtersReady=false;renderAll();});},45);}
+function updateGlobal(){const versionEl=document.querySelector('.version');if(versionEl)versionEl.textContent='Giacenza Dashboard '+DASHBOARD_VERSION;const loaded=state.stockRecords.length>0; $('globalStatus').textContent=loaded?'file giacenza caricato':'carica i file'; $('recordCount').textContent=fmtInt(state.stockRecords.length); $('updatedAt').textContent=loaded?new Date().toLocaleString('it-IT'):'-'; $('activeDatasetPill').textContent='Dataset: '+(state.lastFileNames.stock||'vuoto')+(state.lastFileNames.db?' + DBINFO':''); $('loadAlert').style.display=loaded?'none':'block';}
+function isoCommercialWeek(date){const d=new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate()));const day=d.getUTCDay()||7;d.setUTCDate(d.getUTCDate()+4-day);const yearStart=new Date(Date.UTC(d.getUTCFullYear(),0,1));return Math.ceil((((d-yearStart)/86400000)+1)/7);}
+function pad2(n){return String(n).padStart(2,'0');}
+function uploadWeekdayName(date){return ['Domenica','Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato'][date.getDay()];}
+function seasonDefaultForDate(date){const m=date.getMonth()+1;return (m>=3&&m<=8)?'PE':'AI';}
+function uploadFileExtension(name){const m=String(name||'').match(/(\.[^.]+)$/);return m?m[1]:'.xlsx';}
+function buildCommercialFileName(dateValue,season,originalName){const d=new Date(dateValue+'T12:00:00');if(Number.isNaN(d.getTime()))return '';const yy=String(d.getFullYear()).slice(-2),mm=pad2(d.getMonth()+1),dd=pad2(d.getDate());const w='W'+pad2(isoCommercialWeek(d));return `${yy}${mm}${dd}_${w}_${uploadWeekdayName(d)}_${season}${uploadFileExtension(originalName)}`;}
+function createRenamedUploadFile(file,newName){return new File([file],newName,{type:file.type||'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',lastModified:file.lastModified||Date.now()});}
+function requestUploadFileName(file){return new Promise(resolve=>{const overlay=$('uploadNameModalOverlay'),dateEl=$('uploadNameDate'),seasonEl=$('uploadNameSeason'),preview=$('uploadNamePreview'),confirm=$('uploadNameConfirm'),cancel=$('uploadNameCancel');if(!overlay||!dateEl||!seasonEl||!preview||!confirm||!cancel){resolve(file);return;}const today=new Date();dateEl.value=`${today.getFullYear()}-${pad2(today.getMonth()+1)}-${pad2(today.getDate())}`;seasonEl.value=seasonDefaultForDate(today);function updatePreview(){preview.textContent=buildCommercialFileName(dateEl.value,seasonEl.value,file.name)||'-';}function close(result){overlay.classList.remove('open');overlay.setAttribute('aria-hidden','true');dateEl.removeEventListener('input',updatePreview);seasonEl.removeEventListener('change',updatePreview);confirm.removeEventListener('click',onConfirm);cancel.removeEventListener('click',onCancel);overlay.removeEventListener('click',onOverlay);document.removeEventListener('keydown',onKey);resolve(result);}function onConfirm(){const name=buildCommercialFileName(dateEl.value,seasonEl.value,file.name);if(!name){preview.textContent='Seleziona una data valida';return;}close(createRenamedUploadFile(file,name));}function onCancel(){close(null);}function onOverlay(e){if(e.target===overlay)onCancel();}function onKey(e){if(e.key==='Escape')onCancel();}dateEl.addEventListener('input',updatePreview);seasonEl.addEventListener('change',updatePreview);confirm.addEventListener('click',onConfirm);cancel.addEventListener('click',onCancel);overlay.addEventListener('click',onOverlay);document.addEventListener('keydown',onKey);updatePreview();overlay.classList.add('open');overlay.setAttribute('aria-hidden','false');setTimeout(()=>dateEl.focus(),50);});}
+async function handleLocalUploadFile(file,handler,opts={}){const shouldRename=opts.rename!==false;const finalFile=shouldRename?await requestUploadFileName(file):file;if(finalFile)handler(finalFile);}
+function setupDrop(zoneId,inputId,handler,opts={}){const zone=$(zoneId), input=$(inputId); ['dragenter','dragover'].forEach(ev=>zone.addEventListener(ev,e=>{e.preventDefault();zone.classList.add('dragover')})); ['dragleave','drop'].forEach(ev=>zone.addEventListener(ev,e=>{e.preventDefault();zone.classList.remove('dragover')})); zone.addEventListener('drop',e=>{const f=e.dataTransfer.files&&e.dataTransfer.files[0];if(f)handleLocalUploadFile(f,handler,opts)}); input.addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];if(f)handleLocalUploadFile(f,handler,opts).finally(()=>{input.value='';})});}
+async function readWorkbook(file){const data=await file.arrayBuffer();return XLSX.read(data,{type:'array',cellDates:false,raw:true});}
+function formatDriveDate(v){try{return v?new Date(v).toLocaleString('it-IT'):'data ND';}catch(e){return 'data ND';}}
+function fileToBase64(file){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result||'').split(',').pop()||'');r.onerror=()=>reject(r.error||new Error('Errore conversione base64'));r.readAsDataURL(file);});}
+function parseDriveResponseText(txt){
+  const raw=String(txt||'').trim();
+  if(!raw)throw new Error('Risposta Drive vuota.');
+  try{return JSON.parse(raw);}catch(e){}
+  const m=raw.match(/^[\w.$]+\((.*)\);?$/s);
+  if(m){try{return JSON.parse(m[1]);}catch(e){}}
+  throw new Error('Risposta Drive non in formato JSON/JSONP valido.');
+}
+async function fetchDriveRequest(params,timeoutMs=25000){
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),timeoutMs);
+  try{
+    const qs=new URLSearchParams({...params,_:Date.now()});
+    const res=await fetch(DRIVE_UPLOAD_ENDPOINT+'?'+qs.toString(),{method:'GET',cache:'no-store',redirect:'follow',signal:controller.signal});
+    const txt=await res.text();
+    const data=parseDriveResponseText(txt);
+    if(!res.ok||!data||data.success===false)throw new Error((data&&data.message)||(data&&data.error)||('HTTP '+res.status));
+    return data;
+  }finally{clearTimeout(timer);}
+}
+function jsonpDriveRequest(params,timeoutMs=25000,callbackParam='callback'){
+  return new Promise((resolve,reject)=>{
+    const cb='driveCb_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+    const qs=new URLSearchParams({...params,[callbackParam]:cb,_:Date.now()});
+    const script=document.createElement('script');
+    const timer=setTimeout(()=>{cleanup();reject(new Error('Timeout risposta Drive.'));},timeoutMs);
+    function cleanup(){clearTimeout(timer);try{delete window[cb];}catch(e){window[cb]=undefined;}if(script.parentNode)script.parentNode.removeChild(script);}
+    window[cb]=data=>{cleanup();if(!data||data.success===false)reject(new Error((data&&data.message)||(data&&data.error)||'Risposta Drive non valida'));else resolve(data);};
+    script.onerror=()=>{cleanup();reject(new Error('Caricamento JSONP non riuscito.'));};
+    script.src=DRIVE_UPLOAD_ENDPOINT+'?'+qs.toString();
+    document.head.appendChild(script);
+  });
+}
+async function jsonpRequest(params,timeoutMs=25000){
+  const errors=[];
+  try{return await fetchDriveRequest(params,timeoutMs);}catch(err){errors.push('fetch: '+(err&&err.message?err.message:err));}
+  try{return await jsonpDriveRequest(params,timeoutMs,'callback');}catch(err){errors.push('callback: '+(err&&err.message?err.message:err));}
+  try{return await jsonpDriveRequest(params,timeoutMs,'jsonp');}catch(err){errors.push('jsonp: '+(err&&err.message?err.message:err));}
+  throw new Error('Impossibile contattare/leggere la Web App Drive. Dettaglio: '+errors.join(' | '));
+}
+function sleep(ms){return new Promise(resolve=>setTimeout(resolve,ms));}
+function normalizeDriveName(v){return String(v||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim();}
+function driveFileMatchesUpload(listItem,fileName){
+  const uploaded=String(fileName||'');
+  const candidate=String((listItem&&listItem.fileName)||'');
+  if(!uploaded||!candidate)return false;
+  // v6.8: il file salvato su Drive deve mantenere ESATTAMENTE il nome passato dalla dashboard.
+  // Non accettiamo più match con prefissi/suffissi automatici basati su data/ora di caricamento.
+  return candidate===uploaded;
+}
+async function postNoCorsToDrive(payload){
+  await fetch(DRIVE_UPLOAD_ENDPOINT,{
+    method:'POST',
+    mode:'no-cors',
+    cache:'no-store',
+    redirect:'follow',
+    body:JSON.stringify(payload)
+  });
+  return {success:true,message:'Richiesta upload inviata a Drive.'};
+}
+function postFormToDrive(payload){
+  return new Promise((resolve,reject)=>{
+    const frameName='driveUploadFrame_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+    const iframe=document.createElement('iframe');
+    iframe.name=frameName;iframe.style.display='none';
+    const form=document.createElement('form');
+    form.method='POST';form.action=DRIVE_UPLOAD_ENDPOINT;form.target=frameName;form.enctype='application/x-www-form-urlencoded';form.style.display='none';
+    Object.entries(payload).forEach(([k,v])=>{const input=document.createElement('input');input.type='hidden';input.name=k;input.value=v==null?'':String(v);form.appendChild(input);});
+    let settled=false;
+    const timer=setTimeout(()=>{if(!settled){settled=true;cleanup();resolve({success:true,message:'Richiesta upload inviata a Drive.'});}},9000);
+    function cleanup(){clearTimeout(timer);setTimeout(()=>{if(form.parentNode)form.parentNode.removeChild(form);if(iframe.parentNode)iframe.parentNode.removeChild(iframe);},900);}
+    iframe.onload=()=>{if(!settled){settled=true;cleanup();resolve({success:true,message:'Richiesta upload inviata a Drive.'});}};
+    iframe.onerror=()=>{if(!settled){settled=true;cleanup();reject(new Error('Invio Drive non riuscito.'));}};
+    document.body.appendChild(iframe);document.body.appendChild(form);form.submit();
+  });
+}
+async function waitForDriveUpload(fileType,fileName,beforeIds){
+  const before=new Set((beforeIds||[]).map(String));
+  const started=Date.now();
+  let lastErr=null;
+  while(Date.now()-started<60000){
+    await sleep(2200);
+    try{
+      const files=await listDriveFiles(fileType,{force:true});
+      const found=files.find(f=>!before.has(String(f.fileId||'')) && driveFileMatchesUpload(f,fileName)) || files.find(f=>driveFileMatchesUpload(f,fileName));
+      if(found)return found;
+    }catch(err){lastErr=err;}
+  }
+  throw new Error('Upload inviato, ma il nuovo file non risulta nella cartella Drive con lo stesso nome richiesto. Verifica che Apps Script non aggiunga prefissi/suffissi automatici e riprova. '+(lastErr?lastErr.message:''));
+}
+function clearDriveListCache(fileType){if(fileType)delete driveListCache[fileType];else Object.keys(driveListCache).forEach(k=>delete driveListCache[k]);}
+async function uploadFileToDrive(file,fileType){
+  const before=await listDriveFiles(fileType,{force:true}).catch(()=>[]);
+  const beforeIds=before.map(f=>f.fileId).filter(Boolean);
+  const base64=await fileToBase64(file);
+  const exactName=file.name;
+  const payload={
+    fileName:exactName,
+    saveAsName:exactName,
+    originalFileName:exactName,
+    exactFileName:exactName,
+    preserveFileName:true,
+    keepOriginalName:true,
+    noTimestamp:true,
+    addTimestamp:false,
+    timestamp:false,
+    prefix:'',
+    suffix:'',
+    mimeType:file.type||'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    fileBase64:base64,
+    fileType:fileType
+  };
+  try{
+    await postNoCorsToDrive(payload);
+  }catch(fetchErr){
+    console.warn('Upload no-cors non riuscito, uso fallback form:',fetchErr);
+    await postFormToDrive(payload);
+  }
+  clearDriveListCache(fileType);
+  return waitForDriveUpload(fileType,file.name,beforeIds);
+}
+async function listDriveFiles(fileType,opts={}){
+  const key=String(fileType||'').toUpperCase();
+  const cached=driveListCache[key];
+  if(!opts.force&&cached&&(Date.now()-cached.ts)<DRIVE_CACHE_TTL)return cached.files;
+  const data=await jsonpRequest({action:'list',type:fileType},opts.timeoutMs||18000);
+  const files=Array.isArray(data.files)?data.files:(Array.isArray(data.items)?data.items:[]);
+  driveListCache[key]={ts:Date.now(),files};
+  return files;
+}
+function driveNumericTokens(file){
+  const name=String((file&&file.fileName)||file||'');
+  const matches=name.match(/\d+/g)||[];
+  return matches.map(v=>{const cleaned=v.replace(/^0+/,'')||'0';return {raw:v,num:Number(cleaned),len:cleaned.length};});
+}
+function compareDriveFilesNumericDesc(a,b){
+  const ta=driveNumericTokens(a),tb=driveNumericTokens(b);
+  const max=Math.max(ta.length,tb.length);
+  for(let i=0;i<max;i++){
+    if(!ta[i]&&!tb[i])break;
+    if(!ta[i])return 1;
+    if(!tb[i])return -1;
+    if(ta[i].len!==tb[i].len)return tb[i].len-ta[i].len;
+    if(ta[i].num!==tb[i].num)return tb[i].num-ta[i].num;
+  }
+  const da=new Date(a.updatedDate||a.createdDate||0).getTime()||0;
+  const db=new Date(b.updatedDate||b.createdDate||0).getTime()||0;
+  if(db!==da)return db-da;
+  return String(b.fileName||'').localeCompare(String(a.fileName||''),'it',{numeric:true,sensitivity:'base'});
+}
+function sortDriveFilesNumericDesc(files){return [...(files||[])].sort(compareDriveFilesNumericDesc);}
+function populateDriveSelect(selectId,files,fileType){
+  const sel=$(selectId);if(!sel)return;
+  const sorted=sortDriveFilesNumericDesc(files);
+  sel.innerHTML='<option value="">Drive: seleziona '+fileType+'</option>';
+  sorted.forEach(f=>{const opt=document.createElement('option');opt.value=f.fileId||'';opt.dataset.fileName=f.fileName||'';opt.dataset.fileUrl=f.fileUrl||'';opt.textContent=(f.fileName||'file senza nome');sel.appendChild(opt);});
+  if(!sorted.length)sel.innerHTML='<option value="">Drive: nessun file '+fileType+'</option>';
+}
+async function refreshDriveList(fileType,selectId,statusId,opts={}){
+  const sel=$(selectId);if(sel)sel.innerHTML='<option value="">Drive: aggiornamento…</option>';
+  try{const files=await listDriveFiles(fileType,opts);populateDriveSelect(selectId,files,fileType);return files;}
+  catch(err){console.error(err);if(sel)sel.innerHTML='<option value="">Drive: elenco non disponibile</option>';const el=$(statusId);if(el&&!state.stockRecords.length&&statusId==='stockStatus')setStatus(statusId,'Elenco Drive non disponibile: '+err.message,'bad');if(el&&!state.dbRows.length&&statusId==='dbStatus')setStatus(statusId,'Elenco Drive non disponibile: '+err.message,'bad');return [];}
+}
+function refreshDriveLists(){return Promise.all([refreshDriveList('GIACENZA','stockDriveSelect','stockStatus'),refreshDriveList('DBINFO','dbDriveSelect','dbStatus')]);}
+async function preloadLatestDriveFile(fileType,selectId,statusId,handler){
+  try{
+    const files=await refreshDriveList(fileType,selectId,statusId);
+    const sorted=sortDriveFilesNumericDesc(files||[]);
+    if(!sorted.length)return null;
+    const latest=sorted[0];
+    const sel=$(selectId);
+    if(sel&&latest.fileId)sel.value=latest.fileId;
+    setStatus(statusId,'Caricamento automatico ultimo file da Drive...','loading');
+    const file=await loadDriveFile(fileType,latest.fileId,latest.fileName);
+    await handler(file,{skipDriveUpload:true,fromDrive:true});
+    return latest;
+  }catch(err){
+    console.error(err);
+    setStatus(statusId,'Precaricamento Drive non riuscito: '+err.message,'bad');
+    return null;
+  }
+}
+async function preloadLatestDriveFiles(){
+  await Promise.all([
+    preloadLatestDriveFile('DBINFO','dbDriveSelect','dbStatus',handleDb),
+    refreshDriveList('GIACENZA','stockDriveSelect','stockStatus')
+  ]);
+  if(!state.stockRecords.length){
+    setStatus('stockStatus','Seleziona un file GIACENZA da Drive o caricane uno nuovo.','');
+  }
+}
+async function preloadLatestStockWithPrevious(){
+  try{
+    const files=await refreshDriveList('GIACENZA','stockDriveSelect','stockStatus');
+    const sorted=sortDriveFilesNumericDesc(files||[]);
+    if(sorted[1]){
+      try{
+        const prevFile=await loadDriveFile('GIACENZA',sorted[1].fileId,sorted[1].fileName);
+        const prevWb=await readWorkbook(prevFile);
+        const prevParsed=parseStockWorkbook(prevWb);
+        state.prevStockRecords=enrichRecordArray(prevParsed.records);
+        state.lastFileNames.prevStock=prevFile.name;
+      }catch(prevErr){
+        console.warn('File GIACENZA precedente non caricato:',prevErr);
+        state.prevStockRecords=[];
+        state.lastFileNames.prevStock=null;
+      }
+    }else{
+      state.prevStockRecords=[];
+      state.lastFileNames.prevStock=null;
+    }
+    if(!sorted.length)return null;
+    const latest=sorted[0];
+    const sel=$('stockDriveSelect');
+    if(sel&&latest.fileId)sel.value=latest.fileId;
+    setStatus('stockStatus','Caricamento automatico ultimo file da Drive...','loading');
+    const file=await loadDriveFile('GIACENZA',latest.fileId,latest.fileName);
+    await handleStock(file,{skipDriveUpload:true,fromDrive:true,skipPreviousCapture:true});
+    return latest;
+  }catch(err){
+    console.error(err);
+    setStatus('stockStatus','Precaricamento Drive non riuscito: '+err.message,'bad');
+    return null;
+  }
+}
+async function loadDriveFile(fileType,fileId,fileName){
+  const cacheKey=String(fileType||'')+'|'+String(fileId||'');
+  if(driveFileCache.has(cacheKey))return driveFileCache.get(cacheKey);
+  const data=await jsonpRequest({action:'get',type:fileType,fileId:fileId},45000);
+  if(!data.fileBase64)throw new Error((data&&data.message)||'La Web App non restituisce fileBase64. Aggiorna lo script Apps Script con action=get.');
+  const clean=String(data.fileBase64).split(',').pop();
+  const bin=atob(clean);const len=bin.length;const bytes=new Uint8Array(len);
+  for(let i=0;i<len;i++)bytes[i]=bin.charCodeAt(i);
+  const file=new File([bytes],data.fileName||fileName||('file_'+fileType+'.xlsx'),{type:data.mimeType||'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  driveFileCache.set(cacheKey,file);
+  if(driveFileCache.size>6){const first=driveFileCache.keys().next().value;driveFileCache.delete(first);}
+  return file;
+}
+async function handleDriveSelectChange(fileType,selectId,statusId,handler){
+  const sel=$(selectId);const fileId=sel&&sel.value;if(!fileId)return;
+  const opt=sel.options[sel.selectedIndex];const fileName=opt?opt.dataset.fileName:'';
+  try{setStatus(statusId,'Caricamento da Drive in corso...','loading');const file=await loadDriveFile(fileType,fileId,fileName);await handler(file,{skipDriveUpload:true,fromDrive:true});}
+  catch(err){console.error(err);setStatus(statusId,'File selezionato su Drive. Impossibile caricarlo nella dashboard: '+err.message,'bad');}
+}
+async function handleStock(file,opts={}){try{setStatus('stockStatus','Analisi file in corso...','loading');const previousCurrent=state.stockRecords&&state.stockRecords.length?[...state.stockRecords]:[];const wb=await readWorkbook(file);const parsed=parseStockWorkbook(wb);if(!opts.skipPreviousCapture&&previousCurrent.length){state.prevStockRecords=previousCurrent;state.lastFileNames.prevStock=state.lastFileNames.stock;}state.stockRecords=parsed.records;state.legend=parsed.legend;state.lastFileNames.stock=file.name;if(state.dbMap.size||state.dbNameMap.size)enrichAllRecords();if(!opts.skipDriveUpload){setStatus('stockStatus','Salvataggio GIACENZA su Drive...','loading');try{await uploadFileToDrive(file,'GIACENZA');setTimeout(()=>refreshDriveList('GIACENZA','stockDriveSelect','stockStatus'),1200);}catch(uploadErr){console.error(uploadErr);setStatus('stockStatus','File letto, ma salvataggio Drive non riuscito: '+uploadErr.message,'bad');buildFilters();renderAll();return;}}setStatus('stockStatus',file.name+' - '+fmtInt(state.stockRecords.length)+' record'+(opts.fromDrive?' da Drive':'') ,'ok');buildFilters();renderAll();}catch(err){console.error(err);setStatus('stockStatus','Errore lettura GIACENZA: '+err.message,'bad');}}
+async function handleDb(file,opts={}){try{setStatus('dbStatus','Analisi DBINFO in corso...','loading');const wb=await readWorkbook(file);parseDbWorkbook(wb);state.lastFileNames.db=file.name;if(!opts.skipDriveUpload){setStatus('dbStatus','Salvataggio DBINFO su Drive...','loading');try{await uploadFileToDrive(file,'DBINFO');setTimeout(()=>refreshDriveList('DBINFO','dbDriveSelect','dbStatus'),1200);}catch(uploadErr){console.error(uploadErr);setStatus('dbStatus','File letto, ma salvataggio Drive non riuscito: '+uploadErr.message,'bad');enrichAllRecords();buildFilters();renderAll();return;}}setStatus('dbStatus',file.name+' - '+fmtInt(state.dbRows.length)+' negozi'+(opts.fromDrive?' da Drive':''),'ok');enrichAllRecords();buildFilters();renderAll();}catch(err){console.error(err);setStatus('dbStatus','Errore lettura DBINFO: '+err.message,'bad');}}
+function normalizeSheetName(s){return norm(s).toLowerCase().replace(/\s+/g,' ');}
+function sheetRows(wb,name){
+  const wanted=normalizeSheetName(name);
+  let target=wb.SheetNames.find(s=>normalizeSheetName(s)===wanted);
+  if(!target){
+    target=wb.SheetNames.find(s=>normalizeSheetName(s).startsWith(wanted+' '))||wb.SheetNames.find(s=>normalizeSheetName(s).includes(wanted));
+  }
+  if(!target)throw new Error('Foglio mancante: '+name);
+  return XLSX.utils.sheet_to_json(wb.Sheets[target],{header:1,defval:'',raw:true,blankrows:false});
+}
+function appendParsedRecords(target,source){for(let i=0;i<source.length;i++){target[target.length]=source[i];}}
+function parseStockWorkbook(wb){
+  const records=[];let legend={};
+  try{legend=parseLegend(sheetRows(wb,'Legenda'));}catch(e){legend={};}
+  const gRows=sheetRows(wb,'Genere Commerciale'); appendParsedRecords(records,parseGenere(gRows));
+  const tRows=sheetRows(wb,'Tema'); appendParsedRecords(records,parseTema(tRows));
+  if(!records.length)throw new Error('nessun record rilevato nei fogli Genere Commerciale e Tema. Verifica che il file sia quello di giacenza e che contenga le colonne Cod. Negozio, Negozio, DM e Tipo Dato.');
+  return {records,legend};
+}
+function findHeaderRow(rows){
+  for(let r=0;r<Math.min(rows.length,30);r++){
+    const up=(rows[r]||[]).map(x=>norm(x).toUpperCase());
+    const hasCode=up.some(x=>x==='COD. NEGOZIO'||x==='COD NEGOZIO'||x==='CODICE NEGOZIO');
+    const hasStore=up.some(x=>x==='NEGOZIO');
+    const hasTipo=up.some(x=>x==='TIPO DATO'||x==='TIPODATO');
+    if(hasCode&&hasStore&&hasTipo)return r;
+  }
+  return -1;
+}
+function headerPositions(row){
+  const up=(row||[]).map(x=>norm(x).toUpperCase());
+  const find=(labels,fallback)=>{const i=up.findIndex(x=>labels.includes(x)||labels.includes(x.replace(/\s+/g,'')));return i>=0?i:fallback;};
+  return {
+    codice:find(['COD. NEGOZIO','COD NEGOZIO','CODICE NEGOZIO','COD.NEGOZIO'],1),
+    negozio:find(['NEGOZIO'],2),
+    tige:find(['TIGE'],3),
+    paese:find(['PAESE'],4),
+    codDM:find(['COD. DM','COD DM','COD.DM'],5),
+    dm:find(['DM'],6),
+    tipoDato:find(['TIPO DATO','TIPODATO'],7)
+  };
+}
+function baseRow(row,pos){
+  const code=norm(row[pos.codice]);const store=norm(row[pos.negozio]);
+  return {codice:code,codiceKey:keyCode(code),negozio:store,tige:norm(row[pos.tige]),paese:norm(row[pos.paese]),codDM:norm(row[pos.codDM]),dm:norm(row[pos.dm])||'ND',tipoDato:norm(row[pos.tipoDato])};
+}
+function metricIndex(subHead,start,labels,limit){
+  const max=Math.min(limit??subHead.length,start+8,subHead.length);
+  for(let i=Math.max(0,start);i<max;i++){if(labels.includes(norm(subHead[i]).toUpperCase()))return i;}
+  return -1;
+}
+function isMetricLabel(v){return ['AC','AP','DELTA','Δ'].includes(norm(v).toUpperCase());}
+function isNumericOnlyLabel(v){const n=norm(v).replace(/\s+/g,'');return /^\d+$/.test(n);}
+function isValidDimensionLabel(v){const x=norm(v);return !!x&&!isMetricLabel(x)&&!isNumericOnlyLabel(x)&&!isTotalCategory(x);}
+function readMergedLike(row,start,end){
+  for(let i=start;i<=end;i++){const v=norm(row[i]);if(v)return v;}
+  return '';
+}
+function parseGenere(rows){
+  const out=[];const headerIdx=findHeaderRow(rows);if(headerIdx<0)return out;
+  const header=rows[headerIdx]||[], subHead=rows[headerIdx+1]||[], merceRow=rows[Math.max(0,headerIdx-1)]||[];
+  const pos=headerPositions(header);const startCol=pos.tipoDato+1;const maxCols=Math.max(header.length,subHead.length,merceRow.length);
+  const groups=[];
+  for(let c=startCol;c<maxCols;c++){
+    const itemCode=norm(header[c]);const nextName=norm(header[c+1]);
+    const acIdx=metricIndex(subHead,c,['AC'],c+6);
+    const apIdx=metricIndex(subHead,acIdx>=0?acIdx+1:c+1,['AP'],c+8);
+    const deltaIdx=metricIndex(subHead,apIdx>=0?apIdx+1:c+2,['DELTA','Δ'],c+9);
+    const candidateName=isValidDimensionLabel(nextName)?nextName:(isValidDimensionLabel(itemCode)?itemCode:'');
+    if(candidateName&&acIdx>=0){
+      const merceologia=readMergedLike(merceRow,Math.max(startCol,c-1),Math.min(maxCols-1,(deltaIdx>=0?deltaIdx:acIdx)+1))||'ND';
+      groups.push({itemCode,itemName:candidateName,category:candidateName,merceologia,acIdx,apIdx,deltaIdx});
+      c=Math.max(c,deltaIdx>=0?deltaIdx:acIdx);
+    }
+  }
+  for(let r=headerIdx+2;r<rows.length;r++){
+    const row=rows[r]||[];const b=baseRow(row,pos);if(!b.codice||!b.negozio||!b.tipoDato)continue;
+    for(const g of groups){
+      const ac=row[g.acIdx], ap=g.apIdx>=0?row[g.apIdx]:'', delta=g.deltaIdx>=0?row[g.deltaIdx]:'';
+      if(!hasValue(ac)&&!hasValue(ap)&&!hasValue(delta))continue;
+      out.push({...b,analysis:'GENERE',analysisLabel:'Genere Commerciale',merceologia:g.merceologia,category:g.category,itemCode:g.itemCode,itemName:g.itemName,ac:toNum(ac),ap:toNum(ap),delta:hasValue(delta)?toNum(delta):null});
+    }
+  }
+  return out;
+}
+function parseTema(rows){
+  const out=[];const headerIdx=findHeaderRow(rows);if(headerIdx<0)return out;
+  const header=rows[headerIdx]||[], subHead=rows[headerIdx+1]||[];const pos=headerPositions(header);const startCol=pos.tipoDato+1;const maxCols=Math.max(header.length,subHead.length);
+  const groups=[];
+  for(let c=startCol;c<maxCols;c++){
+    const itemCode=norm(header[c]);const nextName=norm(header[c+1]);
+    const acIdx=metricIndex(subHead,c,['AC'],c+5);
+    const itemName=isValidDimensionLabel(nextName)?nextName:(isValidDimensionLabel(itemCode)?itemCode:'');
+    if(itemName&&acIdx>=0){groups.push({itemCode,itemName,acIdx});c=Math.max(c,acIdx);} 
+  }
+  for(let r=headerIdx+2;r<rows.length;r++){
+    const row=rows[r]||[];const b=baseRow(row,pos);if(!b.codice||!b.negozio||!b.tipoDato)continue;
+    for(const g of groups){const ac=row[g.acIdx];if(!hasValue(ac))continue;out.push({...b,analysis:'TEMA',analysisLabel:'Tema',merceologia:'Tema',category:'Tema',itemCode:g.itemCode,itemName:g.itemName,ac:toNum(ac),ap:0,delta:null});}
+  }
+  return out;
+}
+function parseLegend(rows){const legend={};rows.forEach(row=>{const code=norm(row[1]);const desc=norm(row[3]);if(code&&desc)legend[code]=desc;});return legend;}
+function cleanHeader(v){return norm(v).toUpperCase().replace(/[._-]/g,' ').replace(/\s+/g,' ').trim();}
+function compactHeader(v){return cleanHeader(v).replace(/\s+/g,'');}
+function dbStoreKey(v){return norm(v).toUpperCase().replace(/C\.?C\.?/g,'').replace(/[^A-Z0-9]+/g,' ').replace(/\s+/g,' ').trim();}
+function findDbHeaderRow(rows){
+  for(let r=0;r<Math.min(rows.length,40);r++){
+    const h=(rows[r]||[]).map(compactHeader);
+    const hasCode=h.some(x=>['CODICE','CODNEGOZIO','COD.NEGOZIO','CODICENEGOZIO'].includes(x));
+    const hasStore=h.some(x=>['NEGOZIO','PV','PUNTOVENDITA','STORE'].includes(x));
+    const hasInfo=h.some(x=>['GRADE','CLUSTER','TIPO','SFS','RANKING','RATINGCC','TEST','REGIONE'].includes(x));
+    if((hasCode||hasStore)&&hasInfo)return r;
+  }
+  return -1;
+}
+function parseDbWorkbook(wb){
+  state.dbMap=new Map();state.dbNameMap=new Map();state.dbRows=[];
+  let parsedSheets=0;
+  for(const sheetName of wb.SheetNames){
+    const rows=XLSX.utils.sheet_to_json(wb.Sheets[sheetName],{header:1,defval:'',raw:true,blankrows:false});
+    if(!rows.length)continue;
+    const headerRow=findDbHeaderRow(rows);if(headerRow<0)continue;
+    const headers=(rows[headerRow]||[]).map(compactHeader);
+    const idx=(labels)=>{const labs=labels.map(x=>x.replace(/\s+/g,'').toUpperCase());return headers.findIndex(h=>labs.includes(h));};
+    const pos={
+      codice:idx(['CODICE','COD NEGOZIO','CODICE NEGOZIO','COD. NEGOZIO']),
+      negozio:idx(['NEGOZIO','PV','PUNTO VENDITA','STORE']),
+      grade:idx(['GRADE']),
+      cluster:idx(['CLUSTER']),
+      tipo:idx(['TIPO']),
+      sfs:idx(['SFS']),
+      ranking:idx(['RANKING']),
+      ratingCc:idx(['RATING CC','RATINGCC']),
+      test:idx(['TEST']),
+      regione:idx(['REGIONE'])
+    };
+    if(pos.codice<0&&pos.negozio<0)continue;
+    parsedSheets++;
+    for(let i=headerRow+1;i<rows.length;i++){
+      const row=rows[i]||[];
+      const codice=pos.codice>=0?norm(row[pos.codice]):'';
+      const dbNegozio=pos.negozio>=0?norm(row[pos.negozio]):'';
+      if(!codice&&!dbNegozio)continue;
+      const obj={
+        codice,
+        codiceKey:keyCode(codice),
+        dbNegozio,
+        grade:pos.grade>=0?norm(row[pos.grade]):'',
+        cluster:pos.cluster>=0?norm(row[pos.cluster]):'',
+        tipoStore:pos.tipo>=0?norm(row[pos.tipo]):'',
+        sfs:(pos.sfs>=0?norm(row[pos.sfs]):'')||'NO',
+        ranking:(pos.ranking>=0?norm(row[pos.ranking]):'')||'ND',
+        ratingCc:pos.ratingCc>=0?norm(row[pos.ratingCc]):'',
+        test:pos.test>=0?norm(row[pos.test]):'',
+        regione:pos.regione>=0?norm(row[pos.regione]):''
+      };
+      state.dbRows.push(obj);
+      if(obj.codiceKey)state.dbMap.set(obj.codiceKey,obj);
+      const nKey=dbStoreKey(obj.dbNegozio);if(nKey)state.dbNameMap.set(nKey,obj);
+    }
+  }
+  if(!parsedSheets)throw new Error('nessuna tabella DBINFO riconosciuta. Verifica intestazioni: Codice, Negozio, Grade, Cluster, Tipo, SFS, Ranking, Rating CC, TEST, Regione.');
+  if(!state.dbRows.length)throw new Error('DBINFO letto ma senza negozi validi.');
+  enrichAllRecords();
+}
+function findDbForRecord(r){return state.dbMap.get(r.codiceKey)||state.dbMap.get(keyCode(r.codice))||state.dbNameMap.get(dbStoreKey(r.negozio))||{};}
+function enrichRecordArray(records){return (records||[]).map(r=>{const db=findDbForRecord(r);return {...r,grade:db.grade||'',cluster:db.cluster||'',tipoStore:db.tipoStore||'',sfs:db.sfs||'',ranking:db.ranking||'',ratingCc:db.ratingCc||'',test:db.test||'',regione:db.regione||'',dbNegozio:db.dbNegozio||''};});}
+function enrichAllRecords(){state.stockRecords=enrichRecordArray(state.stockRecords);state.prevStockRecords=enrichRecordArray(state.prevStockRecords);}
+const MAIN_MULTI_FILTER_META={
+  gradeFilter:{label:'Grade',plural:'grade selezionati',field:'grade'},
+  clusterFilter:{label:'Cluster',plural:'cluster selezionati',field:'cluster'},
+  tipoStoreFilter:{label:'Tipo',plural:'tipi selezionati',field:'tipoStore'},
+  sfsFilter:{label:'SFS',plural:'SFS selezionati',field:'sfs'},
+  rankingFilter:{label:'Ranking',plural:'ranking selezionati',field:'ranking'},
+  ratingCcFilter:{label:'Rating CC',plural:'rating selezionati',field:'ratingCc'},
+  testFilter:{label:'TEST',plural:'test selezionati',field:'test'},
+  regioneFilter:{label:'Regione',plural:'regioni selezionate',field:'regione'},
+  categoryFilter:{label:'Categoria',plural:'categorie selezionate',field:'category'}
+};
+function mainFilterSelections(){const out={};filterIds.forEach(id=>{const el=$(id);out[id]=el?getMultiValues(el):[];});return out;}
+function filterValuesForId(id,rows){const data=rows||[];if(id==='storeFilter')return unique(data.map(r=>r.codice+' - '+r.negozio));if(id==='districtFilter')return unique(data.map(r=>r.dm));const meta=MAIN_MULTI_FILTER_META[id];return meta?unique(data.map(r=>r[meta.field]).filter(Boolean)):[];}
+function applyMainSelections(records,selections,ignoreMetrica=false,excludeId=null){let data=records||[];const selectedMetric=$('metricFilter').value;if(selectedMetric&&!ignoreMetrica)data=data.filter(r=>r.tipoDato===selectedMetric);const districtVals=(selections.districtFilter||[]);if(excludeId!=='districtFilter'&&districtVals.length){const districtSet=new Set(districtVals.map(normalizeDistrictName));data=data.filter(r=>districtSet.has(normalizeDistrictName(r.dm)));}const storeVals=(selections.storeFilter||[]);if(excludeId!=='storeFilter'&&storeVals.length){const storeCodes=new Set(storeVals.map(v=>String(v).split(' - ')[0]));data=data.filter(r=>storeCodes.has(r.codice));}Object.entries(MAIN_MULTI_FILTER_META).forEach(([id,meta])=>{if(excludeId===id)return;const vals=selections[id]||[];if(vals.length){const set=new Set(vals);data=data.filter(r=>set.has(r[meta.field]));}});return data;}
+function buildFilters(){const selections=mainFilterSelections();const metricEl=$('metricFilter');const metricKeep=CHART_METRIC_OPTIONS.some(x=>x[0]===metricEl.value)?metricEl.value:'VEN AC';metricEl.innerHTML=CHART_METRIC_OPTIONS.map(([label])=>`<option value="${escapeHtml(label)}">${escapeHtml(label)}</option>`).join('');metricEl.value=metricKeep;const data=state.stockRecords;filterIds.forEach(id=>{const base=applyMainSelections(data,selections,true,id);const values=filterValuesForId(id,base);if(id==='storeFilter')setStoreOptions(values,selections[id]);else if(id==='districtFilter')setDistrictOptions(values,selections[id]);else setOptions(id,values,selections[id]);});state.filtersReady=true;}
+function unique(arr){return [...new Set(arr.map(norm).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'it',{numeric:true,sensitivity:'base'}));}
+function setOptions(id,values,selected){const el=$(id);if(!el)return;const selectedValues=Array.isArray(selected)?selected.filter(Boolean):((selected&&String(selected))?[selected]:[]);const allowed=new Set(values);const selectedSet=new Set(selectedValues.filter(v=>allowed.has(v)));el.innerHTML=values.map(v=>`<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join('');[...el.options].forEach(o=>{o.selected=selectedSet.has(o.value);});refreshMainFilterDropdown(id);}
+function setStoreOptions(values,selected){const el=$('storeFilter');const selectedValues=Array.isArray(selected)?selected.filter(Boolean):[];const allowed=new Set(values);const selectedSet=new Set(selectedValues.filter(v=>allowed.has(v)));el.innerHTML=values.map(v=>`<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join('');[...el.options].forEach(o=>{o.selected=selectedSet.has(o.value);});refreshStoreDropdown();}
+function updateStoreDropdownLabel(){const vals=getMultiValues($('storeFilter'));const btn=$('storeDropdownButton');if(!btn)return;btn.textContent=!vals.length?'Tutti':(vals.length===1?vals[0]:(vals.length<=2?vals.join(', '):vals.length+' negozi selezionati'));}
+function multiVisibleOptions(el,q){return [...el.options].filter(o=>!q||o.value.toLowerCase().includes(q));}
+function multiSelectActionsHtml(){return '<div class="multi-dd-actions"><button type="button" data-action="select-all">Seleziona tutto</button><button type="button" data-action="clear-all">Deseleziona tutto</button></div>';}
+function bindMultiSelectActions(box,el,opts,onAfter){box.querySelectorAll('.multi-dd-actions button').forEach(btn=>btn.addEventListener('click',e=>{e.preventDefault();const select=btn.dataset.action==='select-all';if(el&&el.id==='districtFilter'&&!select)state.districtDefaultApplied=true;opts.forEach(o=>{o.selected=select;});if(typeof onAfter==='function')onAfter();}));}
+function renderStoreCheckboxes(searchText=''){const box=$('storeOptions'),el=$('storeFilter');if(!box||!el)return;const q=norm(searchText).toLowerCase();const opts=multiVisibleOptions(el,q);box.innerHTML=multiSelectActionsHtml()+(opts.length?opts.map(o=>`<label class="multi-dd-option"><input type="checkbox" value="${escapeHtml(o.value)}" ${o.selected?'checked':''}><span>${escapeHtml(o.value)}</span></label>`).join(''):'<div class="multi-dd-empty">Nessun negozio trovato</div>');bindMultiSelectActions(box,el,opts,()=>{updateStoreDropdownLabel();renderStoreCheckboxes(searchText);scheduleFilterRender();});box.querySelectorAll('input[type="checkbox"]').forEach(ch=>ch.addEventListener('change',()=>{const opt=[...el.options].find(o=>o.value===ch.value);if(opt)opt.selected=ch.checked;updateStoreDropdownLabel();scheduleFilterRender();}));}
+function refreshStoreDropdown(){renderStoreCheckboxes($('storeMultiSearch')?$('storeMultiSearch').value:'');updateStoreDropdownLabel();}
+function getMultiValues(el){return el?[...el.selectedOptions].map(o=>o.value).filter(Boolean):[];}
+function normalizeDistrictName(v){const n=norm(v).toUpperCase();return DEFAULT_DISTRICT_ALIASES[n]||n;}
+function updateDistrictDropdownLabel(){const vals=getMultiValues($('districtFilter'));const btn=$('districtDropdownButton');if(!btn)return;btn.textContent=!vals.length?'Tutti':(vals.length<=2?vals.join(', '):vals.length+' distretti selezionati');}
+function renderDistrictCheckboxes(searchText=''){const box=$('districtOptions'),el=$('districtFilter');if(!box||!el)return;const q=norm(searchText).toLowerCase();const opts=multiVisibleOptions(el,q);box.innerHTML=multiSelectActionsHtml()+(opts.length?opts.map(o=>`<label class="multi-dd-option"><input type="checkbox" value="${escapeHtml(o.value)}" ${o.selected?'checked':''}><span>${escapeHtml(o.value)}</span></label>`).join(''):'<div class="multi-dd-empty">Nessun distretto trovato</div>');bindMultiSelectActions(box,el,opts,()=>{updateDistrictDropdownLabel();renderDistrictCheckboxes(searchText);scheduleFilterRender();});box.querySelectorAll('input[type="checkbox"]').forEach(ch=>ch.addEventListener('change',()=>{const opt=[...el.options].find(o=>o.value===ch.value);if(opt)opt.selected=ch.checked;updateDistrictDropdownLabel();scheduleFilterRender();}));}
+function refreshDistrictDropdown(){renderDistrictCheckboxes($('districtSearch')?$('districtSearch').value:'');updateDistrictDropdownLabel();}
+function setDistrictOptions(values,selected){const el=$('districtFilter');const selectedValues=Array.isArray(selected)?selected.filter(Boolean):[];const hasExplicitSelection=selectedValues.length>0;const shouldApplyDefault=!hasExplicitSelection&&!state.districtDefaultApplied&&state.stockRecords.length>0;const selectedNorm=new Set((hasExplicitSelection?selectedValues:(shouldApplyDefault?DEFAULT_DISTRICTS:[])).map(normalizeDistrictName));el.innerHTML=values.map(v=>`<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join('');[...el.options].forEach(o=>{o.selected=selectedNorm.has(normalizeDistrictName(o.value));});if(shouldApplyDefault)state.districtDefaultApplied=true;refreshDistrictDropdown();}
+function mainFilterLabel(id){const vals=getMultiValues($(id));const meta=MAIN_MULTI_FILTER_META[id]||{plural:'valori selezionati'};const btn=$(id+'DropdownButton');if(!btn)return;btn.textContent=!vals.length?'Tutti':(vals.length===1?vals[0]:(vals.length<=2?vals.join(', '):vals.length+' '+meta.plural));}
+function renderMainFilterCheckboxes(id,searchText=''){const el=$(id),box=$(id+'Options');if(!el||!box)return;const q=norm(searchText).toLowerCase();const opts=multiVisibleOptions(el,q);box.innerHTML=multiSelectActionsHtml()+(opts.length?opts.map(o=>`<label class="multi-dd-option"><input type="checkbox" value="${escapeHtml(o.value)}" ${o.selected?'checked':''}><span>${escapeHtml(o.value)}</span></label>`).join(''):'<div class="multi-dd-empty">Nessun valore trovato</div>');bindMultiSelectActions(box,el,opts,()=>{mainFilterLabel(id);renderMainFilterCheckboxes(id,searchText);scheduleFilterRender();});box.querySelectorAll('input[type="checkbox"]').forEach(ch=>ch.addEventListener('change',()=>{const opt=[...el.options].find(o=>o.value===ch.value);if(opt)opt.selected=ch.checked;mainFilterLabel(id);scheduleFilterRender();}));}
+function refreshMainFilterDropdown(id){renderMainFilterCheckboxes(id,$(id+'Search')?$(id+'Search').value:'');mainFilterLabel(id);}
+function setupMainFilterDropdown(id){const dd=$(id+'Dropdown'),btn=$(id+'DropdownButton'),search=$(id+'Search');if(!dd||!btn||!search)return;btn.addEventListener('click',e=>{e.preventDefault();dd.classList.toggle('open');if(dd.classList.contains('open')){search.focus();renderMainFilterCheckboxes(id,search.value);}});document.addEventListener('click',e=>{if(!dd.contains(e.target))dd.classList.remove('open');});search.addEventListener('input',e=>renderMainFilterCheckboxes(id,e.target.value));}
+const CHART_METRIC_OPTIONS=[['VEN AC','VEN'],['SOU AC','SOU'],['GIA AC','GIA'],['QVE7 AC','QVE7']];
+function metricLabelFromCode(code){const f=CHART_METRIC_OPTIONS.find(x=>x[1]===code);return f?f[0]:(code?code+' AC':'VEN AC');}
+function metricCodeFromLabel(label){const f=CHART_METRIC_OPTIONS.find(x=>x[0]===label);return f?f[1]:(String(label||'').replace(/\s*AC$/i,'')||'VEN');}
+function selectedMetricCode(){return metricCodeFromLabel($('metricFilter')?$('metricFilter').value:'VEN AC');}
+function selectedMetricLabel(){return metricLabelFromCode(selectedMetricCode());}
+function metricValueFormatter(metric,v){if(metric==='SOU'||metric==='%U7')return fmtPerc(v);if(metric==='PMV'||metric==='OPZ')return fmtDec(v);return fmtInt(v);}
+function metricDeltaFormatter(metric,v){return (metric==='SOU'||metric==='%U7')?fmtPp(v):fmtPerc(v);}
+function metricAggregate(rows,metric){const clean=(rows||[]).filter(r=>!isSourceTotalRow(r)&&!isTotalCategory(r.category)&&!isTotalCategory(r.itemName));const mr=clean.filter(r=>r.tipoDato===metric);const ac=CATEGORY_SUM_METRICS.has(metric)?sum(mr,'ac'):avgField(mr,'ac');const ap=CATEGORY_SUM_METRICS.has(metric)?sum(mr,'ap'):avgField(mr,'ap');return {value:Number.isFinite(ac)?ac:null,ap:Number.isFinite(ap)?ap:null,delta:calcCategoryDelta(metric,ac,ap),records:mr.length};}
+function filteredRows(records,ignoreMetrica=false){return applyMainSelections(records,mainFilterSelections(),ignoreMetrica,null);}
+function filteredRowsForStoreDetailBase(records){return applyMainSelections(records,mainFilterSelections(),true,'categoryFilter');}
+function labelMulti(vals,singular,plural){if(!vals.length)return singular+': tutte';if(vals.length===1)return vals[0];return vals.length+' '+plural+' selezionati';}
+function setStoreDetailMultiOptions(selectId,values,selected){const el=$(selectId);if(!el)return;const selectedSet=new Set((selected||[]).filter(Boolean));el.innerHTML=values.map(v=>`<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join('');[...el.options].forEach(o=>{o.selected=selectedSet.has(o.value);});}
+function updateStoreDetailInternalDropdownLabels(){const catVals=getMultiValues($('storeDetailCategoryFilter'));const themeVals=getMultiValues($('storeDetailThemeFilter'));const catBtn=$('storeDetailCategoryDropdownButton'),themeBtn=$('storeDetailThemeDropdownButton');if(catBtn)catBtn.textContent=labelMulti(catVals,'Categoria','categorie');if(themeBtn)themeBtn.textContent=labelMulti(themeVals,'Tema','temi');}
+function renderStoreDetailMultiCheckboxes(type,searchText=''){const isCat=type==='category';const selectId=isCat?'storeDetailCategoryFilter':'storeDetailThemeFilter';const boxId=isCat?'storeDetailCategoryOptions':'storeDetailThemeOptions';const emptyTxt=isCat?'Nessuna categoria trovata':'Nessun tema trovato';const box=$(boxId),el=$(selectId);if(!box||!el)return;const q=norm(searchText).toLowerCase();const opts=[...el.options].filter(o=>!q||o.value.toLowerCase().includes(q));box.innerHTML=opts.length?opts.map(o=>`<label class="multi-dd-option"><input type="checkbox" value="${escapeHtml(o.value)}" ${o.selected?'checked':''}><span>${escapeHtml(o.value)}</span></label>`).join(''):`<div class="multi-dd-empty">${emptyTxt}</div>`;box.querySelectorAll('input[type="checkbox"]').forEach(ch=>ch.addEventListener('change',()=>{const opt=[...el.options].find(o=>o.value===ch.value);if(opt)opt.selected=ch.checked;if(ch.checked){const other=$((isCat?'storeDetailThemeFilter':'storeDetailCategoryFilter'));if(other)[...other.options].forEach(o=>o.selected=false);}updateStoreDetailInternalDropdownLabels();renderStoreDetailMultiCheckboxes(isCat?'theme':'category',isCat?($('storeDetailThemeSearch')?.value||''):($('storeDetailCategorySearch')?.value||''));renderAll();}));}
+function refreshStoreDetailInternalDropdowns(){renderStoreDetailMultiCheckboxes('category',$('storeDetailCategorySearch')?$('storeDetailCategorySearch').value:'');renderStoreDetailMultiCheckboxes('theme',$('storeDetailThemeSearch')?$('storeDetailThemeSearch').value:'');updateStoreDetailInternalDropdownLabels();}
+function updateStoreDetailReportFilters(){const catEl=$('storeDetailCategoryFilter'),themeEl=$('storeDetailThemeFilter');if(!catEl||!themeEl)return;const currentCats=getMultiValues(catEl),currentThemes=getMultiValues(themeEl);const base=filteredRowsForStoreDetailBase(state.stockRecords);const catValues=unique(base.filter(r=>r.analysis==='GENERE'&&!isTotalCategory(r.category)).map(r=>r.category).filter(Boolean)).sort((a,b)=>String(a).localeCompare(String(b),'it',{numeric:true,sensitivity:'base'}));const themeValues=unique(base.filter(r=>r.analysis==='TEMA'&&!isTotalCategory(r.itemName)).map(r=>r.itemName).filter(Boolean)).sort((a,b)=>String(a).localeCompare(String(b),'it',{numeric:true,sensitivity:'base'}));setStoreDetailMultiOptions('storeDetailCategoryFilter',catValues,currentCats.filter(v=>catValues.includes(v)));setStoreDetailMultiOptions('storeDetailThemeFilter',themeValues,currentThemes.filter(v=>themeValues.includes(v)));refreshStoreDetailInternalDropdowns();}
+function updateDistrictDetailInternalDropdownLabels(){const catVals=getMultiValues($('districtDetailCategoryFilter'));const themeVals=getMultiValues($('districtDetailThemeFilter'));const catBtn=$('districtDetailCategoryDropdownButton'),themeBtn=$('districtDetailThemeDropdownButton');if(catBtn)catBtn.textContent=labelMulti(catVals,'Categoria','categorie');if(themeBtn)themeBtn.textContent=labelMulti(themeVals,'Tema','temi');}
+function renderDistrictDetailMultiCheckboxes(type,searchText=''){const isCat=type==='category';const selectId=isCat?'districtDetailCategoryFilter':'districtDetailThemeFilter';const boxId=isCat?'districtDetailCategoryOptions':'districtDetailThemeOptions';const emptyTxt=isCat?'Nessuna categoria trovata':'Nessun tema trovato';const box=$(boxId),el=$(selectId);if(!box||!el)return;const q=norm(searchText).toLowerCase();const opts=[...el.options].filter(o=>!q||o.value.toLowerCase().includes(q));box.innerHTML=opts.length?opts.map(o=>`<label class="multi-dd-option"><input type="checkbox" value="${escapeHtml(o.value)}" ${o.selected?'checked':''}><span>${escapeHtml(o.value)}</span></label>`).join(''):`<div class="multi-dd-empty">${emptyTxt}</div>`;box.querySelectorAll('input[type="checkbox"]').forEach(ch=>ch.addEventListener('change',()=>{const opt=[...el.options].find(o=>o.value===ch.value);if(opt)opt.selected=ch.checked;if(ch.checked){const other=$((isCat?'districtDetailThemeFilter':'districtDetailCategoryFilter'));if(other)[...other.options].forEach(o=>o.selected=false);}updateDistrictDetailInternalDropdownLabels();renderDistrictDetailMultiCheckboxes(isCat?'theme':'category',isCat?($('districtDetailThemeSearch')?.value||''):($('districtDetailCategorySearch')?.value||''));renderAll();}));}
+function refreshDistrictDetailInternalDropdowns(){renderDistrictDetailMultiCheckboxes('category',$('districtDetailCategorySearch')?$('districtDetailCategorySearch').value:'');renderDistrictDetailMultiCheckboxes('theme',$('districtDetailThemeSearch')?$('districtDetailThemeSearch').value:'');updateDistrictDetailInternalDropdownLabels();}
+function updateDistrictDetailReportFilters(){const catEl=$('districtDetailCategoryFilter'),themeEl=$('districtDetailThemeFilter');if(!catEl||!themeEl)return;const currentCats=getMultiValues(catEl),currentThemes=getMultiValues(themeEl);const base=filteredRowsForStoreDetailBase(state.stockRecords);const catValues=unique(base.filter(r=>r.analysis==='GENERE'&&!isTotalCategory(r.category)).map(r=>r.category).filter(Boolean)).sort((a,b)=>String(a).localeCompare(String(b),'it',{numeric:true,sensitivity:'base'}));const themeValues=unique(base.filter(r=>r.analysis==='TEMA'&&!isTotalCategory(r.itemName)).map(r=>r.itemName).filter(Boolean)).sort((a,b)=>String(a).localeCompare(String(b),'it',{numeric:true,sensitivity:'base'}));setStoreDetailMultiOptions('districtDetailCategoryFilter',catValues,currentCats.filter(v=>catValues.includes(v)));setStoreDetailMultiOptions('districtDetailThemeFilter',themeValues,currentThemes.filter(v=>themeValues.includes(v)));refreshDistrictDetailInternalDropdowns();}
+function updateGradeDetailInternalDropdownLabels(){const catVals=getMultiValues($('gradeDetailCategoryFilter'));const themeVals=getMultiValues($('gradeDetailThemeFilter'));const catBtn=$('gradeDetailCategoryDropdownButton'),themeBtn=$('gradeDetailThemeDropdownButton');if(catBtn)catBtn.textContent=labelMulti(catVals,'Categoria','categorie');if(themeBtn)themeBtn.textContent=labelMulti(themeVals,'Tema','temi');}
+function renderGradeDetailMultiCheckboxes(type,searchText=''){const isCat=type==='category';const selectId=isCat?'gradeDetailCategoryFilter':'gradeDetailThemeFilter';const boxId=isCat?'gradeDetailCategoryOptions':'gradeDetailThemeOptions';const emptyTxt=isCat?'Nessuna categoria trovata':'Nessun tema trovato';const box=$(boxId),el=$(selectId);if(!box||!el)return;const q=norm(searchText).toLowerCase();const opts=[...el.options].filter(o=>!q||o.value.toLowerCase().includes(q));box.innerHTML=opts.length?opts.map(o=>`<label class="multi-dd-option"><input type="checkbox" value="${escapeHtml(o.value)}" ${o.selected?'checked':''}><span>${escapeHtml(o.value)}</span></label>`).join(''):`<div class="multi-dd-empty">${emptyTxt}</div>`;box.querySelectorAll('input[type="checkbox"]').forEach(ch=>ch.addEventListener('change',()=>{const opt=[...el.options].find(o=>o.value===ch.value);if(opt)opt.selected=ch.checked;if(ch.checked){const other=$((isCat?'gradeDetailThemeFilter':'gradeDetailCategoryFilter'));if(other)[...other.options].forEach(o=>o.selected=false);}updateGradeDetailInternalDropdownLabels();renderGradeDetailMultiCheckboxes(isCat?'theme':'category',isCat?($('gradeDetailThemeSearch')?.value||''):($('gradeDetailCategorySearch')?.value||''));renderAll();}));}
+function refreshGradeDetailInternalDropdowns(){renderGradeDetailMultiCheckboxes('category',$('gradeDetailCategorySearch')?$('gradeDetailCategorySearch').value:'');renderGradeDetailMultiCheckboxes('theme',$('gradeDetailThemeSearch')?$('gradeDetailThemeSearch').value:'');updateGradeDetailInternalDropdownLabels();}
+function updateGradeDetailReportFilters(){const catEl=$('gradeDetailCategoryFilter'),themeEl=$('gradeDetailThemeFilter');if(!catEl||!themeEl)return;const currentCats=getMultiValues(catEl),currentThemes=getMultiValues(themeEl);const base=filteredRowsForStoreDetailBase(state.stockRecords);const catValues=unique(base.filter(r=>r.analysis==='GENERE'&&!isTotalCategory(r.category)).map(r=>r.category).filter(Boolean)).sort((a,b)=>String(a).localeCompare(String(b),'it',{numeric:true,sensitivity:'base'}));const themeValues=unique(base.filter(r=>r.analysis==='TEMA'&&!isTotalCategory(r.itemName)).map(r=>r.itemName).filter(Boolean)).sort((a,b)=>String(a).localeCompare(String(b),'it',{numeric:true,sensitivity:'base'}));setStoreDetailMultiOptions('gradeDetailCategoryFilter',catValues,currentCats.filter(v=>catValues.includes(v)));setStoreDetailMultiOptions('gradeDetailThemeFilter',themeValues,currentThemes.filter(v=>themeValues.includes(v)));refreshGradeDetailInternalDropdowns();}
+const ATTR_DETAIL_CONFIG={
+  tipoDetail:{field:'tipoStore',key:'tipo',label:'Tipo'},
+  sfsDetail:{field:'sfs',key:'sfs',label:'SFS'},
+  rankingDetail:{field:'ranking',key:'ranking',label:'Ranking'},
+  ratingCcDetail:{field:'ratingCc',key:'ratingCc',label:'Rating CC'},
+  testDetail:{field:'test',key:'test',label:'TEST'},
+  regioneDetail:{field:'regione',key:'regione',label:'Regione'}
+};
+function updateAttrDetailInternalDropdownLabels(prefix){const catVals=getMultiValues($(prefix+'CategoryFilter'));const themeVals=getMultiValues($(prefix+'ThemeFilter'));const catBtn=$(prefix+'CategoryDropdownButton'),themeBtn=$(prefix+'ThemeDropdownButton');if(catBtn)catBtn.textContent=labelMulti(catVals,'Categoria','categorie');if(themeBtn)themeBtn.textContent=labelMulti(themeVals,'Tema','temi');}
+function renderAttrDetailMultiCheckboxes(prefix,type,searchText=''){const isCat=type==='category';const selectId=prefix+(isCat?'CategoryFilter':'ThemeFilter');const boxId=prefix+(isCat?'CategoryOptions':'ThemeOptions');const emptyTxt=isCat?'Nessuna categoria trovata':'Nessun tema trovato';const box=$(boxId),el=$(selectId);if(!box||!el)return;const q=norm(searchText).toLowerCase();const opts=[...el.options].filter(o=>!q||o.value.toLowerCase().includes(q));box.innerHTML=opts.length?opts.map(o=>`<label class="multi-dd-option"><input type="checkbox" value="${escapeHtml(o.value)}" ${o.selected?'checked':''}><span>${escapeHtml(o.value)}</span></label>`).join(''):`<div class="multi-dd-empty">${emptyTxt}</div>`;box.querySelectorAll('input[type="checkbox"]').forEach(ch=>ch.addEventListener('change',()=>{const opt=[...el.options].find(o=>o.value===ch.value);if(opt)opt.selected=ch.checked;if(ch.checked){const other=$(prefix+(isCat?'ThemeFilter':'CategoryFilter'));if(other)[...other.options].forEach(o=>o.selected=false);}updateAttrDetailInternalDropdownLabels(prefix);renderAttrDetailMultiCheckboxes(prefix,isCat?'theme':'category',isCat?($(prefix+'ThemeSearch')?.value||''):($(prefix+'CategorySearch')?.value||''));renderAll();}));}
+function refreshAttrDetailInternalDropdowns(prefix){renderAttrDetailMultiCheckboxes(prefix,'category',$(prefix+'CategorySearch')?$(prefix+'CategorySearch').value:'');renderAttrDetailMultiCheckboxes(prefix,'theme',$(prefix+'ThemeSearch')?$(prefix+'ThemeSearch').value:'');updateAttrDetailInternalDropdownLabels(prefix);}
+function updateAttrDetailReportFilters(prefix){const catEl=$(prefix+'CategoryFilter'),themeEl=$(prefix+'ThemeFilter');if(!catEl||!themeEl)return;const currentCats=getMultiValues(catEl),currentThemes=getMultiValues(themeEl);const base=filteredRowsForStoreDetailBase(state.stockRecords);const catValues=unique(base.filter(r=>r.analysis==='GENERE'&&!isTotalCategory(r.category)).map(r=>r.category).filter(Boolean)).sort((a,b)=>String(a).localeCompare(String(b),'it',{numeric:true,sensitivity:'base'}));const themeValues=unique(base.filter(r=>r.analysis==='TEMA'&&!isTotalCategory(r.itemName)).map(r=>r.itemName).filter(Boolean)).sort((a,b)=>String(a).localeCompare(String(b),'it',{numeric:true,sensitivity:'base'}));setStoreDetailMultiOptions(prefix+'CategoryFilter',catValues,currentCats.filter(v=>catValues.includes(v)));setStoreDetailMultiOptions(prefix+'ThemeFilter',themeValues,currentThemes.filter(v=>themeValues.includes(v)));refreshAttrDetailInternalDropdowns(prefix);}
+function updateAllAttrDetailReportFilters(){Object.keys(ATTR_DETAIL_CONFIG).forEach(updateAttrDetailReportFilters);}
+
+
+
+function filteredRecords(ignoreMetrica=false){return filteredRows(state.stockRecords,ignoreMetrica);}
+function groupBy(rows,keyFn){const m=new Map();rows.forEach(r=>{const k=keyFn(r);if(!m.has(k))m.set(k,[]);m.get(k).push(r);});return m;}
+function sum(rows,k){return rows.reduce((a,r)=>a+(Number(r[k])||0),0)}
+function aggregateItems(rows){const g=groupBy(rows,r=>r.analysis+'|'+r.category+'|'+r.itemCode+'|'+r.itemName);return [...g.entries()].map(([k,rs])=>{const [analysis,category,itemCode,itemName]=k.split('|');const ac=sum(rs,'ac'), ap=sum(rs,'ap');return {analysis,category,itemCode,itemName,ac,ap,delta:ap?((ac-ap)/ap):null,stores:new Set(rs.map(r=>r.codice)).size,records:rs.length};});}
+const CATEGORY_METRICS=['QVE7','VEN','%U7','SOU','GIA','PMV','OPZ'];
+const CATEGORY_SUM_METRICS=new Set(['VEN','GIA','QVE7']);
+function avgField(rs,k){const vals=rs.map(r=>Number(r[k])).filter(Number.isFinite);return vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:null;}
+function isTotalCategory(v){return ['TOTALE','TOTAL','TOT'].includes(norm(v).toUpperCase());}
+function isSourceTotalRow(r){return isTotalCategory(r?.category)||isTotalCategory(r?.itemName)||isTotalCategory(r?.theme)||isTotalCategory(r?.store)||isTotalCategory(r?.negozio);}
+function calcCategoryDelta(metric,ac,ap){if(!Number.isFinite(ac)||!Number.isFinite(ap))return null;if(metric==='%U7'||metric==='SOU')return ac-ap;return ap?((ac/ap)-1):null;}
+function aggregateCategoryDetail(rows){const data=rows.filter(r=>r.analysis==='GENERE'&&CATEGORY_METRICS.includes(r.tipoDato)&&!isTotalCategory(r.category));const g=groupBy(data,r=>(r.category||'ND')+'|'+(r.merceologia||'ND'));return [...g.entries()].map(([k,rs])=>{const [category,merceologia]=k.split('|');const row={category,merceologia};CATEGORY_METRICS.forEach(m=>{const mr=rs.filter(x=>x.tipoDato===m);if(CATEGORY_SUM_METRICS.has(m)){const ac=sum(mr,'ac'),ap=sum(mr,'ap');row[m+'_ac']=mr.length?ac:null;row[m+'_ap']=mr.length?ap:null;}else{row[m+'_ac']=avgField(mr,'ac');row[m+'_ap']=avgField(mr,'ap');}row[m+'_delta']=calcCategoryDelta(m,row[m+'_ac'],row[m+'_ap']);});row.records=rs.length;return row;});}
+function aggregateStoreDetail(rows){const cats=getMultiValues($('storeDetailCategoryFilter'));const themes=getMultiValues($('storeDetailThemeFilter'));let data;if(themes.length){const themeSet=new Set(themes);data=rows.filter(r=>r.analysis==='TEMA'&&CATEGORY_METRICS.includes(r.tipoDato)&&!isTotalCategory(r.itemName)&&themeSet.has(r.itemName));}else{data=rows.filter(r=>r.analysis==='GENERE'&&CATEGORY_METRICS.includes(r.tipoDato)&&!isTotalCategory(r.category));if(cats.length){const catSet=new Set(cats);data=data.filter(r=>catSet.has(r.category));}}const g=groupBy(data,r=>(r.codice||'ND')+'|'+(r.negozio||'ND'));return [...g.entries()].map(([k,rs])=>{const [codice,negozio]=k.split('|');const row={store:(codice&&codice!=='ND'?codice+' - ':'')+negozio,codice,negozio};CATEGORY_METRICS.forEach(m=>{const mr=rs.filter(x=>x.tipoDato===m);if(CATEGORY_SUM_METRICS.has(m)){const ac=sum(mr,'ac'),ap=sum(mr,'ap');row[m+'_ac']=mr.length?ac:null;row[m+'_ap']=mr.length?ap:null;}else{row[m+'_ac']=avgField(mr,'ac');row[m+'_ap']=avgField(mr,'ap');}row[m+'_delta']=calcCategoryDelta(m,row[m+'_ac'],row[m+'_ap']);});row.records=rs.length;return row;});}
+function aggregateDistrictDetail(rows){const cats=getMultiValues($('districtDetailCategoryFilter'));const themes=getMultiValues($('districtDetailThemeFilter'));let data;if(themes.length){const themeSet=new Set(themes);data=rows.filter(r=>r.analysis==='TEMA'&&CATEGORY_METRICS.includes(r.tipoDato)&&!isTotalCategory(r.itemName)&&themeSet.has(r.itemName));}else{data=rows.filter(r=>r.analysis==='GENERE'&&CATEGORY_METRICS.includes(r.tipoDato)&&!isTotalCategory(r.category));if(cats.length){const catSet=new Set(cats);data=data.filter(r=>catSet.has(r.category));}}const g=groupBy(data,r=>r.dm||'ND');return [...g.entries()].map(([district,rs])=>{const row={district};CATEGORY_METRICS.forEach(m=>{const mr=rs.filter(x=>x.tipoDato===m);if(CATEGORY_SUM_METRICS.has(m)){const ac=sum(mr,'ac'),ap=sum(mr,'ap');row[m+'_ac']=mr.length?ac:null;row[m+'_ap']=mr.length?ap:null;}else{row[m+'_ac']=avgField(mr,'ac');row[m+'_ap']=avgField(mr,'ap');}row[m+'_delta']=calcCategoryDelta(m,row[m+'_ac'],row[m+'_ap']);});row.records=rs.length;return row;});}
+function aggregateGradeDetail(rows){const cats=getMultiValues($('gradeDetailCategoryFilter'));const themes=getMultiValues($('gradeDetailThemeFilter'));let data;if(themes.length){const themeSet=new Set(themes);data=rows.filter(r=>r.analysis==='TEMA'&&CATEGORY_METRICS.includes(r.tipoDato)&&!isTotalCategory(r.itemName)&&themeSet.has(r.itemName));}else{data=rows.filter(r=>r.analysis==='GENERE'&&CATEGORY_METRICS.includes(r.tipoDato)&&!isTotalCategory(r.category));if(cats.length){const catSet=new Set(cats);data=data.filter(r=>catSet.has(r.category));}}const g=groupBy(data,r=>r.grade||'ND');return [...g.entries()].map(([grade,rs])=>{const row={grade};CATEGORY_METRICS.forEach(m=>{const mr=rs.filter(x=>x.tipoDato===m);if(CATEGORY_SUM_METRICS.has(m)){const ac=sum(mr,'ac'),ap=sum(mr,'ap');row[m+'_ac']=mr.length?ac:null;row[m+'_ap']=mr.length?ap:null;}else{row[m+'_ac']=avgField(mr,'ac');row[m+'_ap']=avgField(mr,'ap');}row[m+'_delta']=calcCategoryDelta(m,row[m+'_ac'],row[m+'_ap']);});row.records=rs.length;return row;});}
+function aggregateAttrDetail(rows,prefix){const cfg=ATTR_DETAIL_CONFIG[prefix];const cats=getMultiValues($(prefix+'CategoryFilter'));const themes=getMultiValues($(prefix+'ThemeFilter'));let data;if(themes.length){const themeSet=new Set(themes);data=rows.filter(r=>r.analysis==='TEMA'&&CATEGORY_METRICS.includes(r.tipoDato)&&!isTotalCategory(r.itemName)&&themeSet.has(r.itemName));}else{data=rows.filter(r=>r.analysis==='GENERE'&&CATEGORY_METRICS.includes(r.tipoDato)&&!isTotalCategory(r.category));if(cats.length){const catSet=new Set(cats);data=data.filter(r=>catSet.has(r.category));}}const g=groupBy(data,r=>r[cfg.field]||'ND');return [...g.entries()].map(([val,rs])=>{const row={[cfg.key]:val};CATEGORY_METRICS.forEach(m=>{const mr=rs.filter(x=>x.tipoDato===m);if(CATEGORY_SUM_METRICS.has(m)){const ac=sum(mr,'ac'),ap=sum(mr,'ap');row[m+'_ac']=mr.length?ac:null;row[m+'_ap']=mr.length?ap:null;}else{row[m+'_ac']=avgField(mr,'ac');row[m+'_ap']=avgField(mr,'ap');}row[m+'_delta']=calcCategoryDelta(m,row[m+'_ac'],row[m+'_ap']);});row.records=rs.length;return row;});}
+
+
+function aggregateThemeDetail(rows){const data=rows.filter(r=>r.analysis==='TEMA'&&CATEGORY_METRICS.includes(r.tipoDato)&&!isTotalCategory(r.itemName));const g=groupBy(data,r=>(r.itemName||'ND')+'|'+(r.merceologia||'Tema'));return [...g.entries()].map(([k,rs])=>{const [theme,merceologia]=k.split('|');const row={theme,merceologia};CATEGORY_METRICS.forEach(m=>{const mr=rs.filter(x=>x.tipoDato===m);if(CATEGORY_SUM_METRICS.has(m)){row[m+'_ac']=mr.length?sum(mr,'ac'):null;}else{row[m+'_ac']=avgField(mr,'ac');}});row.resa_skc_u7=(Number.isFinite(row.QVE7_ac)&&Number.isFinite(row.OPZ_ac)&&row.OPZ_ac!==0)?row.QVE7_ac/row.OPZ_ac:null;row.resa_skc_tot=(Number.isFinite(row.VEN_ac)&&Number.isFinite(row.OPZ_ac)&&row.OPZ_ac!==0)?row.VEN_ac/row.OPZ_ac:null;row.gia_media_skc=(Number.isFinite(row.GIA_ac)&&Number.isFinite(row.OPZ_ac)&&row.OPZ_ac!==0)?row.GIA_ac/row.OPZ_ac:null;row.records=rs.length;return row;});}
+function themeTableCols(){return [['theme','Tema'],['QVE7_ac','QVE7 AC'],['%U7_ac','%U7 AC'],['resa_skc_u7','Resa SKC U7'],['VEN_ac','VEN AC'],['resa_skc_tot','Resa SKC TOT'],['GIA_ac','GIA AC'],['gia_media_skc','GIA MEDIA SKC'],['SOU_ac','SOU AC'],['PMV_ac','PMV AC'],['OPZ_ac','OPZ AC']];}
+function buildThemeTotals(rows){const totals={theme:'Totale',merceologia:''};CATEGORY_METRICS.forEach(m=>{const key=m+'_ac';totals[key]=CATEGORY_SUM_METRICS.has(m)?sum(rows,key):avgField(rows,key);});totals.resa_skc_u7=(Number.isFinite(totals.QVE7_ac)&&Number.isFinite(totals.OPZ_ac)&&totals.OPZ_ac!==0)?totals.QVE7_ac/totals.OPZ_ac:null;totals.resa_skc_tot=(Number.isFinite(totals.VEN_ac)&&Number.isFinite(totals.OPZ_ac)&&totals.OPZ_ac!==0)?totals.VEN_ac/totals.OPZ_ac:null;totals.gia_media_skc=(Number.isFinite(totals.GIA_ac)&&Number.isFinite(totals.OPZ_ac)&&totals.OPZ_ac!==0)?totals.GIA_ac/totals.OPZ_ac:null;return totals;}
+function resaRange(rows,k){const vals=rows.map(r=>r[k]).filter(Number.isFinite);return {min:vals.length?Math.min(...vals):0,max:vals.length?Math.max(...vals):0};}
+function resaCell(v,range){if(!Number.isFinite(v))return 'ND';const span=range.max-range.min;const pct=span?Math.max(0,Math.min(1,(v-range.min)/span)):1;const w=Math.max(7,Math.round(pct*100));return `<div class="resa-cell"><span class="resa-val">${fmtDec(v,2)}</span><span class="resa-bar"><i style="--w:${w}%"></i></span></div>`;}
+function themeCell(v,k,ranges){if(k==='resa_skc_u7'||k==='resa_skc_tot'||k==='gia_media_skc')return resaCell(v,ranges[k]||{min:0,max:0});return cell(v,k);}
+function aggregateCategories(rows){const metric=selectedMetricCode();const g=groupBy(rows.filter(r=>r.analysis==='GENERE'&&r.category&&!['AC','AP','DELTA'].includes(String(r.category).toUpperCase())),r=>r.category||'ND');return [...g.entries()].map(([category,rs])=>{const agg=metricAggregate(rs,metric);return {label:category,value:agg.value||0,sub:(rs[0]?.merceologia||''),ap:agg.ap,delta:agg.delta,records:agg.records,metric};});}
+function aggregateThemes(rows){const metric=selectedMetricCode();const g=groupBy(rows.filter(r=>r.analysis==='TEMA'&&r.itemName&&!['AC','AP','DELTA'].includes(String(r.itemName).toUpperCase())),r=>(r.itemCode||'')+'|'+(r.itemName||'ND'));return [...g.entries()].map(([k,rs])=>{const [itemCode,itemName]=k.split('|');const agg=metricAggregate(rs,metric);return {label:itemName||itemCode||'ND',value:agg.value||0,sub:itemCode,ap:agg.ap,delta:agg.delta,records:agg.records,metric};});}
+function aggregateStores(rows){const metric=selectedMetricCode();const base=(rows||[]).filter(r=>r.analysis==='GENERE');const g=groupBy(base,r=>r.codice+'|'+r.negozio+'|'+r.dm);return [...g.entries()].map(([k,rs])=>{const [codice,negozio,dm]=k.split('|');const first=rs[0]||{};const agg=metricAggregate(rs,metric);return {codice,negozio,dm,grade:first.grade,cluster:first.cluster,tipoStore:first.tipoStore,sfs:first.sfs,ranking:first.ranking,ratingCc:first.ratingCc,test:first.test,regione:first.regione,ac:agg.value||0,ap:agg.ap,delta:agg.delta,items:new Set(rs.map(r=>r.itemCode+'|'+r.itemName)).size,records:agg.records,metric};});}
+function metricVal(row){return row.ac||0;}
+
+const SEARCH_INPUT_IDS=['itemTableSearch','districtDetailTableSearch','gradeDetailTableSearch','tipoDetailTableSearch','sfsDetailTableSearch','rankingDetailTableSearch','ratingCcDetailTableSearch','testDetailTableSearch','regioneDetailTableSearch','storeDetailTableSearch','periodTableSearch','periodThemeTableSearch','themeTableSearch','storeTableSearch'];
+const searchState={timer:null,lastKey:''};
+function normalizeSearchQuery(id){const el=$(id);return norm(el?el.value:'').toLowerCase().trim();}
+function rowSearchText(row){if(!row)return '';if(row.__searchText)return row.__searchText;const txt=Object.values(row).map(v=>v==null?'':String(v)).join(' ').toLowerCase();try{Object.defineProperty(row,'__searchText',{value:txt,enumerable:false,writable:true});}catch(e){row.__searchText=txt;}return txt;}
+function matchesManualSearch(row,q){return !q||rowSearchText(row).includes(q);}
+function scheduleManualSearchRender(){const key=SEARCH_INPUT_IDS.map(id=>normalizeSearchQuery(id)).join('|');if(key===searchState.lastKey)return;searchState.lastKey=key;clearTimeout(searchState.timer);searchState.timer=setTimeout(()=>{window.requestAnimationFrame?requestAnimationFrame(renderAll):renderAll();},180);}
+function activeFilterSummary(){
+  const parts=[];
+  const metric=$('metricFilter')?.value;
+  if(metric)parts.push('Metrica: '+metric);
+  const districts=getMultiValues($('districtFilter'));
+  if(districts.length)parts.push('Distretto: '+districts.join(', '));
+  const stores=getMultiValues($('storeFilter'));
+  if(stores.length)parts.push('Negozio: '+(stores.length<=3?stores.join(', '):stores.length+' negozi selezionati'));
+  const labels=[['gradeFilter','Grade'],['clusterFilter','Cluster'],['tipoStoreFilter','Tipo'],['sfsFilter','SFS'],['rankingFilter','Ranking'],['ratingCcFilter','Rating CC'],['testFilter','TEST'],['regioneFilter','Regione'],['categoryFilter','Categoria']];
+  labels.forEach(([id,label])=>{const vals=getMultiValues($(id));if(vals.length)parts.push(label+': '+(vals.length<=3?vals.join(', '):vals.length+' valori selezionati'));});
+  const itemTableQ=$('itemTableSearch')?.value?.trim();
+  const themeTableQ=$('themeTableSearch')?.value?.trim();
+  const districtDetailQ=$('districtDetailTableSearch')?.value?.trim();
+  const districtDetailCats=getMultiValues($('districtDetailCategoryFilter'));
+  const districtDetailThemes=getMultiValues($('districtDetailThemeFilter'));
+  const storeDetailQ=$('storeDetailTableSearch')?.value?.trim();
+  const storeDetailCats=getMultiValues($('storeDetailCategoryFilter'));
+  const storeDetailThemes=getMultiValues($('storeDetailThemeFilter'));
+  const gradeDetailQ=$('gradeDetailTableSearch')?.value?.trim();
+  const gradeDetailCats=getMultiValues($('gradeDetailCategoryFilter'));
+  const gradeDetailThemes=getMultiValues($('gradeDetailThemeFilter'));
+  if(districtDetailCats.length)parts.push('Categoria dettaglio distretti: '+(districtDetailCats.length<=3?districtDetailCats.join(', '):districtDetailCats.length+' categorie selezionate'));
+  if(districtDetailThemes.length)parts.push('Tema dettaglio distretti: '+(districtDetailThemes.length<=3?districtDetailThemes.join(', '):districtDetailThemes.length+' temi selezionati'));
+  if(storeDetailCats.length)parts.push('Categoria dettaglio negozi: '+(storeDetailCats.length<=3?storeDetailCats.join(', '):storeDetailCats.length+' categorie selezionate'));
+  if(storeDetailThemes.length)parts.push('Tema dettaglio negozi: '+(storeDetailThemes.length<=3?storeDetailThemes.join(', '):storeDetailThemes.length+' temi selezionati'));
+  if(gradeDetailCats.length)parts.push('Categoria grade: '+(gradeDetailCats.length<=3?gradeDetailCats.join(', '):gradeDetailCats.length+' categorie selezionate'));
+  if(gradeDetailThemes.length)parts.push('Tema grade: '+(gradeDetailThemes.length<=3?gradeDetailThemes.join(', '):gradeDetailThemes.length+' temi selezionati'));
+  if(itemTableQ)parts.push('Ricerca tabella categoria: '+itemTableQ);
+  if(themeTableQ)parts.push('Ricerca tabella temi: '+themeTableQ);
+  if(districtDetailQ)parts.push('Ricerca tabella distretti: '+districtDetailQ);
+  if(storeDetailQ)parts.push('Ricerca tabella negozi: '+storeDetailQ);
+  if(gradeDetailQ)parts.push('Ricerca tabella grade: '+gradeDetailQ);
+  return 'Filtri selezionati: '+(parts.length?parts.join(' | '):'nessun filtro applicato');
+}
+function updateFilterSummaries(){const txt=activeFilterSummary();document.querySelectorAll('.small-filter-summary').forEach(el=>el.textContent=txt);}
+function renderAll(){updateGlobal();buildFilters();updateDistrictDetailReportFilters();updateGradeDetailReportFilters();updateAllAttrDetailReportFilters();updateStoreDetailReportFilters();const rows=filteredRecords();const metricRows=filteredRecords(true);updateFilterSummaries();renderKpis(metricRows);renderCharts(metricRows);renderDataQuality();renderTables(rows);renderLegend();}
+function renderKpis(rows){const metric=selectedMetricCode(),metricLabel=selectedMetricLabel();const genreRows=(rows||[]).filter(r=>r.analysis==='GENERE'&&!isSourceTotalRow(r)&&!isTotalCategory(r.category));const selectedAgg=metricAggregate(genreRows,metric);$('kpi1Label').textContent='Totale AC';$('kTotalAc').textContent=Number.isFinite(selectedAgg.value)?metricValueFormatter(metric,selectedAgg.value):'ND';$('kTotalAcSub').textContent=metricLabel+' | Genere Commerciale, riga TOTALE esclusa';$('kTotalAp').textContent=Number.isFinite(selectedAgg.ap)?metricValueFormatter(metric,selectedAgg.ap):'ND';$('kTotalApSub').textContent=metricLabel.replace(' AC',' AP')+' | Genere Commerciale, riga TOTALE esclusa';$('kDelta').textContent=Number.isFinite(selectedAgg.delta)?metricDeltaFormatter(metric,selectedAgg.delta):'ND';$('kDelta').className='value '+((selectedAgg.delta||0)>0?'pos':(selectedAgg.delta||0)<0?'neg':'');$('kDeltaSub').textContent=Number.isFinite(selectedAgg.delta)?'Delta calcolato su dati aggregati, riga TOTALE esclusa':'Non disponibile';const souAgg=metricAggregate(genreRows,'SOU');const qve7Agg=metricAggregate(genreRows,'QVE7');if($('kStoresLabel'))$('kStoresLabel').textContent='SELL-THROUGH AC';$('kStores').textContent=Number.isFinite(souAgg.value)?fmtPerc(souAgg.value):'ND';$('kStores').className='value';$('kStoresSub').innerHTML='SOU AP: <strong>'+ (Number.isFinite(souAgg.ap)?fmtPerc(souAgg.ap):'ND') +'</strong> | Delta: <strong class="'+((souAgg.delta||0)>0?'pos':(souAgg.delta||0)<0?'neg':'')+'">'+(Number.isFinite(souAgg.delta)?fmtPp(souAgg.delta):'ND')+'</strong>';if($('kItemsLabel'))$('kItemsLabel').textContent='VENDUTO U7';$('kItems').textContent=Number.isFinite(qve7Agg.value)?fmtInt(qve7Agg.value):'ND';$('kItems').className='value';$('kItemsSub').innerHTML='QVE7 AP: <strong>'+ (Number.isFinite(qve7Agg.ap)?fmtInt(qve7Agg.ap):'ND') +'</strong> | Delta: <strong class="'+((qve7Agg.delta||0)>0?'pos':(qve7Agg.delta||0)<0?'neg':'')+'">'+(Number.isFinite(qve7Agg.delta)?fmtPerc(qve7Agg.delta):'ND')+'</strong>'; }
+
+function dqLevelRank(level){return level==='bad'?3:level==='warn'?2:level==='info'?1:0;}
+function dqStatusLabel(level){return level==='bad'?'Critico':level==='warn'?'Attenzione':level==='info'?'Info':'OK';}
+function dqPush(list,level,area,check,detail,action){list.push({level,area,check,detail,action});}
+function finiteVals(rows,fields){let n=0;rows.forEach(r=>fields.forEach(f=>{if(Number.isFinite(r[f]))n++;}));return n;}
+function pctOutOfRangeRows(rows){return rows.filter(r=>['%U7','SOU'].includes(r.tipoDato)&&(['ac','ap'].some(k=>Number.isFinite(r[k])&&(r[k]<-0.001||r[k]>1.05))));}
+function renderDataQuality(){
+  const summary=$('dqSummary'),table=$('dqTable');if(!summary||!table)return;
+  const rows=filteredRecords(true),allRows=state.stockRecords||[],items=[];
+  if(!allRows.length){summary.innerHTML='<div class="dq-card"><div class="label">Stato</div><div class="value dq-warn">ND</div><div class="sub">Carica un file GIACENZA</div></div>';table.querySelector('thead').innerHTML='';table.querySelector('tbody').innerHTML='<tr><td class="empty">Nessun dato disponibile</td></tr>';return;}
+  const expected=[...CATEGORY_METRICS,'SPE'];
+  const genre=rows.filter(r=>r.analysis==='GENERE'),themes=rows.filter(r=>r.analysis==='TEMA');
+  const storeKeys=unique(rows.map(r=>r.codice+'|'+r.negozio));
+  dqPush(items,'ok','Struttura file','Record letti',fmtInt(rows.length)+' record filtrati su '+fmtInt(allRows.length)+' totali','Nessuna azione se il volume è coerente con il perimetro selezionato.');
+  dqPush(items,genre.length&&themes.length?'ok':'warn','Struttura file','Fogli Genere Commerciale / Tema','Genere: '+fmtInt(genre.length)+' record | Tema: '+fmtInt(themes.length)+' record',genre.length&&themes.length?'Fogli correttamente interpretati.':'Verificare che il file contenga entrambi i fogli e che le intestazioni siano coerenti.');
+  const legendKeys=Object.keys(state.legend||{});
+  const missingLegend=expected.filter(m=>!legendKeys.some(k=>String(k).toUpperCase()===m.toUpperCase()));
+  dqPush(items,legendKeys.length?(missingLegend.length?'warn':'ok'):'warn','Legenda','Copertura legenda',legendKeys.length?('Voci legenda: '+legendKeys.length+(missingLegend.length?' | mancanti: '+missingLegend.join(', '):'')):'Legenda non caricata o vuota',missingLegend.length?'Aggiornare il foglio LEGENDA con tutte le metriche usate nei report.':'Legenda coerente con le metriche principali.');
+  const unknownTypes=unique(rows.map(r=>r.tipoDato).filter(t=>t&&!expected.includes(t)));
+  dqPush(items,unknownTypes.length?'warn':'ok','Legenda','Tipo dato riconosciuto',unknownTypes.length?unknownTypes.join(', '):'Tutti i Tipo Dato rientrano nelle metriche attese','Se presenti valori inattesi, verificare codifiche o nuove metriche nel file originale.');
+  const missingDbStores=unique(rows.filter(r=>!r.grade&&!r.cluster&&!r.tipoStore&&!r.regione&&!r.ratingCc&&!r.test).map(r=>r.codice+' - '+r.negozio));
+  dqPush(items,missingDbStores.length?'warn':'ok','DBINFO','Copertura negozi DBINFO',missingDbStores.length?fmtInt(missingDbStores.length)+' negozi senza match DBINFO su '+fmtInt(storeKeys.length):'Tutti i negozi filtrati hanno match DBINFO',missingDbStores.length?'Verificare codice negozio e denominazione nel DBINFO. Prime anomalie: '+missingDbStores.slice(0,5).join(' | '):'Nessuna azione.');
+  const missingFields=['grade','cluster','tipoStore','sfs','ranking','ratingCc','test','regione'].map(f=>({f,count:unique(rows.filter(r=>!norm(r[f])).map(r=>r.codice)).length})).filter(x=>x.count>0);
+  dqPush(items,missingFields.length?'warn':'ok','DBINFO','Campi anagrafici completi',missingFields.length?missingFields.map(x=>x.f+': '+x.count).join(' | '):'Grade, Cluster, Tipo, SFS, Ranking, Rating CC, TEST e Regione valorizzati','Completare i campi mancanti su DBINFO per usare filtri e aggregazioni in modo affidabile.');
+  const invalidNumeric=rows.filter(r=>!Number.isFinite(r.ac)||r.analysis==='GENERE'&&hasValue(r.ap)&&!Number.isFinite(r.ap));
+  dqPush(items,invalidNumeric.length?'bad':'ok','Numeri','Valori AC/AP leggibili',invalidNumeric.length?fmtInt(invalidNumeric.length)+' record con AC/AP non numerico':'AC/AP leggibili sui record disponibili',invalidNumeric.length?'Controllare celle vuote, testo, simboli o formati non numerici nei fogli GIACENZA.':'Nessuna azione.');
+  const apZero=genre.filter(r=>Number.isFinite(r.ac)&&r.ac!==0&&Number.isFinite(r.ap)&&r.ap===0);
+  dqPush(items,apZero.length?'warn':'ok','Algoritmi Delta','AP zero con AC valorizzato',apZero.length?fmtInt(apZero.length)+' record: delta percentuale non interpretabile':'Nessun AP zero critico rilevato','Verificare AP a zero dove il confronto AC/AP genera delta infinito o non significativo.');
+  const deltaMismatch=genre.filter(r=>Number.isFinite(r.ac)&&Number.isFinite(r.ap)&&r.ap!==0&&Number.isFinite(r.delta)).filter(r=>{const exp=(r.tipoDato==='%U7'||r.tipoDato==='SOU')?(r.ac-r.ap):(r.ac/r.ap-1);return Math.abs(exp-r.delta)>0.025;});
+  dqPush(items,deltaMismatch.length?'warn':'ok','Algoritmi Delta','Coerenza Delta AC/AP',deltaMismatch.length?fmtInt(deltaMismatch.length)+' record con delta distante dall’algoritmo atteso':'Delta coerenti con algoritmi AC/AP','Per VEN, GIA, PMV, OPZ e QVE7 atteso (AC/AP)-1; per %U7 e SOU atteso AC-AP in punti.');
+  const pctBad=pctOutOfRangeRows(rows);
+  dqPush(items,pctBad.length?'bad':'ok','Percentuali','Range %U7 / SOU',pctBad.length?fmtInt(pctBad.length)+' valori fuori range 0%-105%':'%U7 e SOU entro range plausibile','Se i valori sono 15 invece di 0,15 il file potrebbe avere percentuali non normalizzate.');
+  const ratioRows=aggregateThemeDetail(rows).filter(r=>Number.isFinite(r.OPZ_ac)&&r.OPZ_ac===0&&((Number.isFinite(r.QVE7_ac)&&r.QVE7_ac!==0)||(Number.isFinite(r.VEN_ac)&&r.VEN_ac!==0)||(Number.isFinite(r.GIA_ac)&&r.GIA_ac!==0)));
+  dqPush(items,ratioRows.length?'warn':'ok','Algoritmi Resa','OPZ AC zero con VEN/QVE7/GIA valorizzati',ratioRows.length?fmtInt(ratioRows.length)+' temi con resa SKC non calcolabile':'Rese SKC calcolabili dove i dati sono presenti','Verificare OPZ AC, perché Resa SKC U7, Resa SKC TOT e GIA Media SKC dipendono da OPZ AC.');
+  const dupMap=new Map();rows.forEach(r=>{const dim=r.analysis==='TEMA'?r.itemName:r.category;const k=[r.analysis,r.codice,dim,r.tipoDato].join('|');dupMap.set(k,(dupMap.get(k)||0)+1);});
+  const dup=[...dupMap.entries()].filter(([,v])=>v>1);
+  dqPush(items,dup.length?'warn':'ok','Univocità','Duplicati per negozio/dimensione/tipo dato',dup.length?fmtInt(dup.length)+' chiavi duplicate':'Nessun duplicato strutturale rilevato','Se presenti duplicati, verificare righe ripetute o dimensioni duplicate nel file originale.');
+  const numericDims=unique(rows.filter(r=>r.analysis==='GENERE'&&(/^\d+$/.test(norm(r.category))||['AC','AP','DELTA'].includes(norm(r.category).toUpperCase()))).map(r=>r.category));
+  dqPush(items,numericDims.length?'bad':'ok','Dimensioni','Categorie anomale',numericDims.length?'Categorie sospette: '+numericDims.slice(0,10).join(', '):'Nessuna categoria numerica/tecnica rilevata','Correggere intestazioni o merge nel foglio Genere Commerciale se compaiono codici come categorie.');
+  const checkCount=items.length,bad=items.filter(x=>x.level==='bad').length,warn=items.filter(x=>x.level==='warn').length,ok=items.filter(x=>x.level==='ok').length,info=items.filter(x=>x.level==='info').length;
+  summary.innerHTML=`<div class="dq-card"><div class="label">Esito generale</div><div class="value ${bad?'dq-bad':warn?'dq-warn':'dq-ok'}">${bad?'Critico':warn?'Attenzione':'OK'}</div><div class="sub">${checkCount} controlli eseguiti</div></div><div class="dq-card"><div class="label">Criticità</div><div class="value dq-bad">${fmtInt(bad)}</div><div class="sub">Da correggere prima dell’analisi</div></div><div class="dq-card"><div class="label">Warning</div><div class="value dq-warn">${fmtInt(warn)}</div><div class="sub">Da verificare</div></div><div class="dq-card"><div class="label">Record controllati</div><div class="value dq-info">${fmtInt(rows.length)}</div><div class="sub">Filtri attivi, metrica esclusa</div></div><div class="dq-card"><div class="label">Negozi</div><div class="value">${fmtInt(storeKeys.length)}</div><div class="sub">Punti vendita nel perimetro</div></div>`;
+  const sorted=[...items].sort((a,b)=>dqLevelRank(b.level)-dqLevelRank(a.level)||a.area.localeCompare(b.area,'it'));
+  table.querySelector('thead').innerHTML='<tr><th>Area</th><th>Controllo</th><th>Esito</th><th>Dettaglio</th><th>Azione consigliata</th></tr>';
+  table.querySelector('tbody').innerHTML=sorted.map(r=>`<tr class="dq-row-${r.level}"><td>${escapeHtml(r.area)}</td><td>${escapeHtml(r.check)}</td><td class="dq-status ${r.level==='bad'?'dq-bad':r.level==='warn'?'dq-warn':r.level==='info'?'dq-info':'dq-ok'}">${dqStatusLabel(r.level)}</td><td>${escapeHtml(r.detail)}</td><td>${escapeHtml(r.action)}</td></tr>`).join('');
+}
+
+function renderCharts(rows){const metric=selectedMetricCode(),metricLabel=selectedMetricLabel();const categoryRows=(rows||[]).filter(r=>r.analysis==='GENERE');const themeRows=(rows||[]).filter(r=>r.analysis==='TEMA');const categories=aggregateCategories(categoryRows).sort((a,b)=>b.value-a.value);drawBarChart('itemChart',categories,{variant:'category',valueLabel:metricLabel,metricType:metric});const stores=aggregateStores(rows).sort((a,b)=>metricVal(b)-metricVal(a)).slice(0,20);drawBarChart('storeChart',stores.map(x=>({label:x.negozio,value:metricVal(x),sub:x.codice+' | '+(x.dm||'ND'),ap:x.ap,delta:x.delta,records:x.records,metric})),{color2:true,variant:'store',valueLabel:metricLabel,metricType:metric});const byDistrict=[...groupBy(categoryRows,r=>r.dm||'ND').entries()].map(([dm,rs])=>{const agg=metricAggregate(rs,metric);return {label:dm,value:agg.value||0,ap:agg.ap,delta:agg.delta,sub:new Set(rs.map(r=>r.codice)).size+' negozi',records:agg.records,metric};}).sort((a,b)=>b.value-a.value).slice(0,20);drawBarChart('districtChart',byDistrict,{variant:'district',valueLabel:metricLabel,metricType:metric});const themes=aggregateThemes(themeRows).sort((a,b)=>b.value-a.value);drawBarChart('typeChart',themes,{color2:true,variant:'theme',valueLabel:metricLabel,metricType:metric});}
+function chartMetricFormatter(v,opt={}){return metricValueFormatter(opt.metricType||selectedMetricCode(),v);}
+function chartTooltipHtml(d,opt,index,total){const metric=opt.metricType||d.metric||selectedMetricCode();const lines=[];lines.push('<strong>'+escapeHtml(d.label||'ND')+'</strong>');if(d.sub)lines.push('<span>'+escapeHtml(d.sub)+'</span>');lines.push('<span>Ranking: '+(index+1)+' / '+total+'</span>');lines.push('<span>'+escapeHtml(opt.valueLabel||metricLabelFromCode(metric))+': '+metricValueFormatter(metric,d.value)+'</span>');if(Number.isFinite(d.ap))lines.push('<span>'+metric+' AP: '+metricValueFormatter(metric,d.ap)+'</span>');if(Number.isFinite(d.delta))lines.push('<span>'+metric+' DELTA: '+metricDeltaFormatter(metric,d.delta)+'</span>');if(Number.isFinite(d.records))lines.push('<span>Record: '+fmtInt(d.records)+'</span>');return lines.join('');}
+function ensureChartTooltip(){let el=document.getElementById('chartTooltip');if(!el){el=document.createElement('div');el.id='chartTooltip';el.className='chart-tooltip';document.body.appendChild(el);}return el;}
+function showChartTooltip(evt,html){const tip=ensureChartTooltip();tip.innerHTML=html;tip.style.left=evt.clientX+'px';tip.style.top=(evt.clientY-10)+'px';tip.style.opacity='1';}
+function moveChartTooltip(evt){const tip=ensureChartTooltip();tip.style.left=evt.clientX+'px';tip.style.top=(evt.clientY-10)+'px';}
+function hideChartTooltip(){const tip=document.getElementById('chartTooltip');if(tip)tip.style.opacity='0';}
+function attachChartTooltip(svg,data,opt){svg.querySelectorAll('[data-chart-index]').forEach(el=>{const idx=Number(el.dataset.chartIndex);const html=chartTooltipHtml(data[idx],opt,idx,data.length);el.addEventListener('mouseenter',e=>showChartTooltip(e,html));el.addEventListener('mousemove',moveChartTooltip);el.addEventListener('mouseleave',hideChartTooltip);});}
+function drawBarChart(id,data,opt={}){const svg=$(id);if(!data.length){svg.removeAttribute('viewBox');svg.setAttribute('preserveAspectRatio','none');svg.style.height='100%';svg.style.minHeight='100%';svg.innerHTML='<text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" class="txt">Nessun dato disponibile</text>';return;}const wrap=svg.closest('.svgwrap');const wrapH=Math.max(300,wrap?Math.round(wrap.clientHeight):390);const wrapW=Math.max(760,wrap?Math.round(wrap.clientWidth):900);const w=900,left=230,right=112,top=8,bottom=2;const usableH=Math.max(120,wrapH-top-bottom);let rowH;if(data.length<=10){rowH=Math.max(30,Math.floor(usableH/Math.max(1,data.length)));}else if(data.length<=18){rowH=Math.max(23,Math.floor(usableH/Math.max(1,data.length)));}else{rowH=24;}const h=Math.max(wrapH,top+bottom+data.length*rowH);svg.setAttribute('viewBox',`0 0 ${w} ${h}`);svg.setAttribute('preserveAspectRatio','none');svg.style.height=h+'px';svg.style.minHeight=h+'px';svg.style.width='100%';svg.style.margin='0';svg.style.padding='0';const values=data.map(d=>Number(d.value)||0);const max=Math.max(...values.map(v=>Math.abs(v)),1);const chartW=w-left-right;let html='';[0,.25,.5,.75,1].forEach(t=>{const x=left+t*chartW;html+=`<line class="chart-grid" x1="${x}" y1="${top}" x2="${x}" y2="${h-bottom}"/><text x="${x}" y="${top+8}" text-anchor="middle" class="chart-axis-label">${chartMetricFormatter(max*t,opt)}</text>`;});html+=`<line class="axis" x1="${left}" y1="${top}" x2="${left}" y2="${h-bottom}"/>`;data.forEach((d,i)=>{const rowTop=top+i*rowH;const y=rowTop+Math.max(0,(rowH-20)/2)+10;const val=Number(d.value)||0;const bw=Math.max(2,Math.abs(val)/max*chartW);const cls=opt.color2?'bar2':(val<0?'barBad':'bar');const label=escapeHtml(String(d.label||'ND')).slice(0,38);const valueTxt=chartMetricFormatter(val,opt);const sub=d.sub?escapeHtml(String(d.sub)).slice(0,42):'';html+=`<g class="chart-point" data-chart-index="${i}"><text x="10" y="${y+3}" class="chart-label">${label}</text>${sub?`<text x="10" y="${y+14}" class="chart-sub">${sub}</text>`:''}<rect class="chart-bar ${cls}" x="${left}" y="${y-10}" width="${bw}" height="17" rx="7"></rect><text x="${Math.min(left+bw+8,w-78)}" y="${y+3}" class="chart-value">${valueTxt}</text><rect x="0" y="${rowTop}" width="${w}" height="${rowH}" fill="transparent"></rect></g>`;});svg.innerHTML=html;attachChartTooltip(svg,data,opt);}
+window.addEventListener('resize',()=>{clearTimeout(window.__chartResizeTimer);window.__chartResizeTimer=setTimeout(()=>{if(document.querySelector('#page-charts.active'))renderCharts(filteredRecords());},120);});
+function renderTables(rows){const allRows=filteredRecords(true);const storeBaseRows=filteredRowsForStoreDetailBase(state.stockRecords);const prevRows=filteredRows(state.prevStockRecords,true);const items=aggregateCategoryDetail(allRows);const districtDetails=aggregateDistrictDetail(storeBaseRows);const gradeDetails=aggregateGradeDetail(storeBaseRows);const attrDetails={};Object.keys(ATTR_DETAIL_CONFIG).forEach(p=>attrDetails[p]=aggregateAttrDetail(storeBaseRows,p));const storeDetails=aggregateStoreDetail(storeBaseRows);const previousItems=aggregateCategoryDetail(prevRows);const periodItems=addPeriodComparison(items,previousItems);const themes=aggregateThemeDetail(allRows);const previousThemes=aggregateThemeDetail(prevRows);const periodThemes=addThemePeriodComparison(themes,previousThemes);renderDistrictDetailTable(districtDetails);renderGradeDetailTable(gradeDetails);Object.keys(ATTR_DETAIL_CONFIG).forEach(p=>renderAttrDetailTable(p,attrDetails[p]));renderStoreDetailTable(storeDetails);renderItemsTable(items);renderPeriodTable(periodItems);renderPeriodThemeTable(periodThemes);renderThemesTable(themes);}
+function sortRows(rows,sort){const [k,dir]=sort;return [...rows].sort((a,b)=>{const av=a[k],bv=b[k];const n=(typeof av==='number'||typeof bv==='number')?((av||0)-(bv||0)):norm(av).localeCompare(norm(bv),'it');return dir==='asc'?n:-n;});}
+function categoryTableCols(){const cols=[['category','Categoria']];const ordered=['QVE7','%U7','GIA',...CATEGORY_METRICS.filter(m=>!['QVE7','%U7','GIA'].includes(m))];ordered.forEach(m=>{cols.push([m+'_ac',m+' AC'],[m+'_ap',m+' AP'],[m+'_delta',m+' Delta']);});return cols;}
+function districtDetailTableCols(){const cols=categoryTableCols().filter(([k])=>!['%U7_ac','%U7_ap','%U7_delta'].includes(k));cols[0]=['district','Distretto'];return cols;}
+function gradeDetailTableCols(){const cols=categoryTableCols().filter(([k])=>!['%U7_ac','%U7_ap','%U7_delta'].includes(k));cols[0]=['grade','Grade'];return cols;}
+function attrDetailTableCols(prefix){const cfg=ATTR_DETAIL_CONFIG[prefix];const cols=categoryTableCols().filter(([k])=>!['%U7_ac','%U7_ap','%U7_delta'].includes(k));cols[0]=[cfg.key,cfg.label];return cols;}
+function storeDetailTableCols(){const cols=categoryTableCols().filter(([k])=>!['%U7_ac','%U7_ap','%U7_delta'].includes(k));cols[0]=['store','Negozi'];return cols;}
+function buildCategoryTotals(rows){const totals={category:'Totale',store:'Totale',district:'Totale',grade:'Totale',tipo:'Totale',sfs:'Totale',ranking:'Totale',ratingCc:'Totale',test:'Totale',regione:'Totale',merceologia:''};CATEGORY_METRICS.forEach(m=>{const acKey=m+'_ac',apKey=m+'_ap',dKey=m+'_delta';if(CATEGORY_SUM_METRICS.has(m)||m==='%U7'){totals[acKey]=sum(rows,acKey);totals[apKey]=sum(rows,apKey);}else{totals[acKey]=avgField(rows,acKey);totals[apKey]=avgField(rows,apKey);}totals[dKey]=calcCategoryDelta(m,totals[acKey],totals[apKey]);});if(rows&&rows.some(r=>Object.prototype.hasOwnProperty.call(r,'periodo_ac'))){totals.periodo_ac=sum(rows,'periodo_ac');totals.periodo_ap=sum(rows,'periodo_ap');totals.d_periodo_ap=totals.periodo_ac-totals.periodo_ap;totals.pct_d_periodo_ap=totals.periodo_ap?totals.d_periodo_ap/totals.periodo_ap:null;totals.peso_periodo=totals.periodo_ac?1:null;}return totals;}
+function renderDistrictDetailTable(rows){const q=norm($('districtDetailTableSearch')?.value||'').toLowerCase();if(q)rows=rows.filter(r=>matchesManualSearch(r,q));rows=sortRows(rows,state.sort.districtDetail);const cols=districtDetailTableCols();fillCategoryTable('districtDetailTable',cols,rows,state.sort.districtDetail,(k)=>{state.sort.districtDetail=[k,state.sort.districtDetail[0]===k&&state.sort.districtDetail[1]==='desc'?'asc':'desc'];renderAll();});}
+function renderGradeDetailTable(rows){const q=norm($('gradeDetailTableSearch')?.value||'').toLowerCase();if(q)rows=rows.filter(r=>matchesManualSearch(r,q));rows=sortRows(rows,state.sort.gradeDetail);const cols=gradeDetailTableCols();fillCategoryTable('gradeDetailTable',cols,rows,state.sort.gradeDetail,(k)=>{state.sort.gradeDetail=[k,state.sort.gradeDetail[0]===k&&state.sort.gradeDetail[1]==='desc'?'asc':'desc'];renderAll();});}
+function renderAttrDetailTable(prefix,rows){const q=norm($(prefix+'TableSearch')?.value||'').toLowerCase();if(q)rows=rows.filter(r=>matchesManualSearch(r,q));rows=sortRows(rows,state.sort[prefix]);const cols=attrDetailTableCols(prefix);fillCategoryTable(prefix+'Table',cols,rows,state.sort[prefix],(k)=>{state.sort[prefix]=[k,state.sort[prefix][0]===k&&state.sort[prefix][1]==='desc'?'asc':'desc'];renderAll();});}
+function renderStoreDetailTable(rows){const q=norm($('storeDetailTableSearch')?.value||'').toLowerCase();if(q)rows=rows.filter(r=>matchesManualSearch(r,q));rows=sortRows(rows,state.sort.storeDetail);const cols=storeDetailTableCols();fillCategoryTable('storeDetailTable',cols,rows,state.sort.storeDetail,(k)=>{state.sort.storeDetail=[k,state.sort.storeDetail[0]===k&&state.sort.storeDetail[1]==='desc'?'asc':'desc'];renderAll();});}
+function renderItemsTable(rows){const q=norm($('itemTableSearch').value).toLowerCase();if(q)rows=rows.filter(r=>matchesManualSearch(r,q));rows=rows.filter(r=>!isTotalCategory(r.category));rows=sortRows(rows,state.sort.items);const cols=categoryTableCols();fillCategoryTable('itemsTable',cols,rows,state.sort.items,(k)=>{state.sort.items=[k,state.sort.items[0]===k&&state.sort.items[1]==='desc'?'asc':'desc'];renderAll();});}
+function periodKey(row){return norm(row.category).toUpperCase();}
+function addPeriodComparison(currentRows,previousRows){const prevMap=new Map((previousRows||[]).map(r=>[periodKey(r),r]));return (currentRows||[]).map(r=>{const p=prevMap.get(periodKey(r))||{};const venAc=Number.isFinite(r.VEN_ac)?r.VEN_ac:null;const venAp=Number.isFinite(r.VEN_ap)?r.VEN_ap:null;const prevVenAc=Number.isFinite(p.VEN_ac)?p.VEN_ac:null;const prevVenAp=Number.isFinite(p.VEN_ap)?p.VEN_ap:null;const periodoAc=(Number.isFinite(venAc)&&Number.isFinite(prevVenAc))?venAc-prevVenAc:null;const periodoAp=(Number.isFinite(venAp)&&Number.isFinite(prevVenAp))?venAp-prevVenAp:null;const dPeriodo=(Number.isFinite(periodoAc)&&Number.isFinite(periodoAp))?periodoAc-periodoAp:null;const pctD=(Number.isFinite(dPeriodo)&&Number.isFinite(periodoAp)&&periodoAp!==0)?dPeriodo/periodoAp:null;return {...r,periodo_ac:periodoAc,periodo_ap:periodoAp,d_periodo_ap:dPeriodo,pct_d_periodo_ap:pctD};});}
+function periodTableCols(){return [['category','Categoria'],['GIA_ac','GIA AC'],['VEN_ac','VEN AC'],['periodo_ac','Periodo AC'],['periodo_ap','Periodo AP'],['d_periodo_ap','D Periodo AP'],['pct_d_periodo_ap','% D Periodo AP'],['peso_periodo','%Peso Periodo']];}
+function renderPeriodTable(rows){const qEl=$('periodTableSearch');const q=norm(qEl?qEl.value:'').toLowerCase();if(q)rows=rows.filter(r=>matchesManualSearch(r,q));rows=rows.filter(r=>!isTotalCategory(r.category));rows=addPeriodWeight(rows);rows=sortRows(rows,state.sort.period);const cols=periodTableCols();fillCategoryTable('periodTable',cols,rows,state.sort.period,(k)=>{state.sort.period=[k,state.sort.period[0]===k&&state.sort.period[1]==='desc'?'asc':'desc'];renderAll();});}
+function themePeriodKey(row){return norm(row.theme).toUpperCase();}
+function addThemePeriodComparison(currentRows,previousRows){const prevMap=new Map((previousRows||[]).map(r=>[themePeriodKey(r),r]));return (currentRows||[]).map(r=>{const p=prevMap.get(themePeriodKey(r))||{};const venAc=Number.isFinite(r.VEN_ac)?r.VEN_ac:null;const prevVenAc=Number.isFinite(p.VEN_ac)?p.VEN_ac:null;const periodoAc=(Number.isFinite(venAc)&&Number.isFinite(prevVenAc))?venAc-prevVenAc:null;return {...r,periodo_ac:periodoAc};});}
+function addPeriodWeight(rows){const total=sum(rows||[],'periodo_ac');return (rows||[]).map(r=>({...r,peso_periodo:(Number.isFinite(r.periodo_ac)&&total!==0)?r.periodo_ac/total:null}));}
+function periodThemeTableCols(){return [['theme','Tema'],['GIA_ac','GIA AC'],['VEN_ac','VEN AC'],['QVE7_ac','QVE7 AC'],['periodo_ac','Periodo AC'],['peso_periodo','%Peso Periodo']];}
+function renderPeriodThemeTable(rows){const qEl=$('periodThemeTableSearch');const q=norm(qEl?qEl.value:'').toLowerCase();if(q)rows=rows.filter(r=>matchesManualSearch(r,q));rows=addPeriodWeight(rows);rows=sortRows(rows,state.sort.periodTheme);const cols=periodThemeTableCols();fillPeriodThemeTable('periodThemeTable',cols,rows,state.sort.periodTheme,(k)=>{state.sort.periodTheme=[k,state.sort.periodTheme[0]===k&&state.sort.periodTheme[1]==='desc'?'asc':'desc'];renderAll();});}
+function renderThemesTable(rows){const q=norm($('themeTableSearch').value).toLowerCase();if(q)rows=rows.filter(r=>matchesManualSearch(r,q));rows=sortRows(rows,state.sort.themes);const cols=themeTableCols();fillThemeTable('themeTable',cols,rows,state.sort.themes,(k)=>{state.sort.themes=[k,state.sort.themes[0]===k&&state.sort.themes[1]==='desc'?'asc':'desc'];renderAll();});}
+function renderStoresTable(rows){const q=norm($('storeTableSearch').value).toLowerCase();if(q)rows=rows.filter(r=>matchesManualSearch(r,q));rows=sortRows(rows,state.sort.stores);const cols=[['codice','Codice'],['negozio','Negozio'],['dm','Distretto'],['grade','Grade'],['cluster','Cluster'],['tipoStore','Tipo'],['sfs','SFS'],['ranking','Ranking'],['ratingCc','Rating CC'],['test','TEST'],['regione','Regione'],['ac','AC'],['ap','AP'],['delta','Delta %'],['items','Item']];fillTable('storesTable',cols,rows,state.sort.stores,(k)=>{state.sort.stores=[k,state.sort.stores[0]===k&&state.sort.stores[1]==='desc'?'asc':'desc'];renderAll();});}
+function fmtPp(n){if(!Number.isFinite(n))return 'ND';return (n*100).toLocaleString('it-IT',{minimumFractionDigits:1,maximumFractionDigits:1})+'pp';}
+function metricFromKey(k){return String(k).replace(/_(ac|ap|delta)$/,'');}
+function cell(v,k){if(k==='d_periodo_ap'){if(!Number.isFinite(v))return 'ND';if(v>0)return `<span class="pos">+${fmtInt(v)}</span>`;if(v<0)return `<span class="neg">${fmtInt(v)}</span>`;return fmtInt(v);}if(['periodo_ac','periodo_ap'].includes(k))return Number.isFinite(v)?fmtInt(v):'ND';if(k==='pct_d_periodo_ap')return `<span class="${(v||0)>=0?'pos':'neg'}">${fmtPerc(v)}</span>`;if(k==='peso_periodo')return Number.isFinite(v)?fmtPerc(v):'ND';if(k==='delta'||k.endsWith('_delta')){const metric=metricFromKey(k);const txt=(metric==='%U7'||metric==='SOU')?fmtPp(v):fmtPerc(v);return `<span class="${(v||0)>=0?'pos':'neg'}">${txt}</span>`;}if(k.startsWith('%U7_')||k.startsWith('SOU_'))return Number.isFinite(v)?fmtPerc(v):'ND';if(k.startsWith('PMV_')||k.startsWith('OPZ_'))return Number.isFinite(v)?fmtDec(v):'ND';if(k.endsWith('_ac')||k.endsWith('_ap')||['ac','ap','stores','records','items'].includes(k))return Number.isFinite(v)?fmtInt(v):'ND';return escapeHtml(v);}
+function fillCategoryTable(id,cols,rows,sort,onSort){const t=$(id),thead=t.querySelector('thead'),tbody=t.querySelector('tbody'),tfoot=t.querySelector('tfoot');thead.innerHTML='<tr>'+cols.map(([k,l])=>`<th data-k="${k}">${l}${sort[0]===k?(sort[1]==='desc'?' ▼':' ▲'):''}</th>`).join('')+'</tr>';thead.querySelectorAll('th').forEach(th=>th.addEventListener('click',()=>onSort(th.dataset.k)));const limit=800;tbody.innerHTML=rows.slice(0,limit).map(r=>'<tr>'+cols.map(([k])=>`<td>${cell(r[k],k)}</td>`).join('')+'</tr>').join('')||( `<tr><td colspan="${cols.length}" class="empty">Nessun dato disponibile</td></tr>`);const totals=buildCategoryTotals(rows);tfoot.innerHTML='<tr>'+cols.map(([k])=>`<td>${cell(totals[k],k)}</td>`).join('')+'</tr>';}
+function fillThemeTable(id,cols,rows,sort,onSort){const t=$(id),thead=t.querySelector('thead'),tbody=t.querySelector('tbody'),tfoot=t.querySelector('tfoot');const ranges={resa_skc_u7:resaRange(rows,'resa_skc_u7'),resa_skc_tot:resaRange(rows,'resa_skc_tot'),gia_media_skc:resaRange(rows,'gia_media_skc')};thead.innerHTML='<tr>'+cols.map(([k,l])=>`<th data-k="${k}">${l}${sort[0]===k?(sort[1]==='desc'?' ▼':' ▲'):''}</th>`).join('')+'</tr>';thead.querySelectorAll('th').forEach(th=>th.addEventListener('click',()=>onSort(th.dataset.k)));const limit=800;tbody.innerHTML=rows.slice(0,limit).map(r=>'<tr>'+cols.map(([k])=>`<td>${themeCell(r[k],k,ranges)}</td>`).join('')+'</tr>').join('')||( `<tr><td colspan="${cols.length}" class="empty">Nessun dato disponibile</td></tr>`);const totals=buildThemeTotals(rows);tfoot.innerHTML='<tr>'+cols.map(([k])=>`<td>${themeCell(totals[k],k,ranges)}</td>`).join('')+'</tr>';}
+function fillPeriodThemeTable(id,cols,rows,sort,onSort){const t=$(id),thead=t.querySelector('thead'),tbody=t.querySelector('tbody'),tfoot=t.querySelector('tfoot');thead.innerHTML='<tr>'+cols.map(([k,l])=>`<th data-k="${k}">${l}${sort[0]===k?(sort[1]==='desc'?' ▼':' ▲'):''}</th>`).join('')+'</tr>';thead.querySelectorAll('th').forEach(th=>th.addEventListener('click',()=>onSort(th.dataset.k)));const limit=800;tbody.innerHTML=rows.slice(0,limit).map(r=>'<tr>'+cols.map(([k])=>`<td>${cell(r[k],k)}</td>`).join('')+'</tr>').join('')||( `<tr><td colspan="${cols.length}" class="empty">Nessun dato disponibile</td></tr>`);const totals=buildThemeTotals(rows);totals.periodo_ac=sum(rows,'periodo_ac');totals.peso_periodo=totals.periodo_ac?1:null;tfoot.innerHTML='<tr>'+cols.map(([k])=>`<td>${cell(totals[k],k)}</td>`).join('')+'</tr>';}
+function fillTable(id,cols,rows,sort,onSort){const t=$(id),thead=t.querySelector('thead'),tbody=t.querySelector('tbody'),tfoot=t.querySelector('tfoot');thead.innerHTML='<tr>'+cols.map(([k,l])=>`<th data-k="${k}">${l}${sort[0]===k?(sort[1]==='desc'?' ▼':' ▲'):''}</th>`).join('')+'</tr>';thead.querySelectorAll('th').forEach(th=>th.addEventListener('click',()=>onSort(th.dataset.k)));const limit=800;tbody.innerHTML=rows.slice(0,limit).map(r=>'<tr>'+cols.map(([k])=>`<td>${cell(r[k],k)}</td>`).join('')+'</tr>').join('')||( `<tr><td colspan="${cols.length}" class="empty">Nessun dato disponibile</td></tr>`);const totals={ac:sum(rows,'ac'),ap:sum(rows,'ap')};totals.delta=totals.ap?((totals.ac-totals.ap)/totals.ap):null;tfoot.innerHTML='<tr>'+cols.map(([k],i)=>`<td>${i===0?'Totale':(['ac','ap','delta'].includes(k)?cell(totals[k],k):'')}</td>`).join('')+'</tr>';}
+function renderLegend(){const grid=$('legendGrid');const entries=Object.entries(state.legend);grid.innerHTML=entries.length?entries.map(([k,v])=>`<div class="legend-card"><div class="legend-code">${escapeHtml(k)}</div><div class="legend-desc">${escapeHtml(v)}</div></div>`).join(''):'<div class="empty">Legenda non ancora caricata</div>';}
+function exportCsv(rows,filename){if(!rows.length)return;const cols=Object.keys(rows[0]).filter(k=>!['records'].includes(k));const csv=[cols.join(';'),...rows.map(r=>cols.map(c=>'"'+norm(r[c]).replace(/"/g,'""')+'"').join(';'))].join('\n');const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;a.click();URL.revokeObjectURL(a.href);}
+
+function tableMatrix(tableId){
+  const table=$(tableId); if(!table)return {head:[],body:[],foot:[]};
+  const clean=t=>String(t||'').replace(/[▼▲]/g,'').replace(/\s+/g,' ').trim();
+  const rowVals=tr=>Array.from(tr.children).map(td=>clean(td.textContent));
+  return {
+    head:Array.from(table.querySelectorAll('thead tr')).map(rowVals),
+    body:Array.from(table.querySelectorAll('tbody tr')).filter(tr=>!tr.querySelector('.empty')).map(rowVals),
+    foot:Array.from(table.querySelectorAll('tfoot tr')).map(rowVals)
+  };
+}
+function exportTableExcel(tableId,title,filename){
+  const m=tableMatrix(tableId); if(!m.head.length){alert('Tabella non disponibile.');return;}
+  const colCount=Math.max(...m.head.concat(m.body,m.foot).map(r=>r.length));
+  const safe=s=>String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const now=new Date().toLocaleString('it-IT');
+  const makeRow=(r,cls='')=>'<tr>'+Array.from({length:colCount},(_,i)=>`<td class="${cls}">${safe(r[i]||'')}</td>`).join('')+'</tr>';
+  const makeHead=r=>'<tr>'+Array.from({length:colCount},(_,i)=>`<th>${safe(r[i]||'')}</th>`).join('')+'</tr>';
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
+    body{font-family:Arial,sans-serif;color:#182235} h1{font-size:18px;margin:0 0 4px} .meta{font-size:11px;color:#687386;margin-bottom:12px}
+    table{border-collapse:collapse;width:100%;font-size:12.5px;table-layout:auto} th{background:#f8fbff;color:#4d5a6d;font-weight:700;text-transform:uppercase;border:1px solid #cbd5e1;padding:8px 9px;text-align:center;line-height:1.22;white-space:normal;mso-height-source:auto}
+    td{border:1px solid #dde5f1;padding:8px 9px;text-align:right;white-space:nowrap;line-height:1.22;mso-height-source:auto} td:first-child,th:first-child{text-align:left;font-weight:700;background:#ffffff;min-width:145px}
+    tfoot td,.total{background:#fcfdff;font-weight:700;border-top:2px solid #94a3b8}.pos{color:#0f9f6e}.neg{color:#dc2626}
+  
+/* v2.9 Drive upload and Drive file selectors */
+.drive-select{min-width:210px;max-width:260px;height:30px!important;min-height:30px!important;padding:5px 8px!important;border-radius:10px!important;font-size:11px!important;background:#fff;border:1px solid var(--line);color:var(--ink)}
+.drop-actions .drive-select{display:inline-block}
+@media(max-width:900px){.drive-select{min-width:100%;max-width:100%}.drop-actions{justify-content:stretch}.drop-actions>*{flex:1}}
+
+/* v3.3 chart viewport optimization: elimina letterboxing verticale e usa lo spazio utile */
+#page-charts .chartbox{padding:14px 16px 12px!important;}
+#page-charts .chartbox .hint{margin-bottom:8px!important;}
+#page-charts .svgwrap{height:392px!important;overflow:auto!important;}
+#page-charts .main .svgwrap{height:390px!important;}
+#page-charts svg{display:block!important;width:100%!important;}
+
+</style></head><body><h1>${safe(title)}</h1><div class="meta">${safe('Giacenza Dashboard '+DASHBOARD_VERSION+' | Esportato il '+now)}</div><table><thead>${m.head.map(makeHead).join('')}</thead><tbody>${m.body.map(r=>makeRow(r)).join('')}</tbody><tfoot>${m.foot.map(r=>makeRow(r,'total')).join('')}</tfoot></table></body></html>`;
+  const blob=new Blob(['\ufeff',html],{type:'application/vnd.ms-excel;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename.endsWith('.xls')?filename:filename+'.xls';a.click();URL.revokeObjectURL(a.href);
+}
+function exportTablePdf(tableId,title,filename){
+  const m=tableMatrix(tableId); if(!m.head.length){alert('Tabella non disponibile.');return;}
+  if(!window.jspdf||!window.jspdf.jsPDF){alert('Libreria PDF non caricata. Verifica la connessione internet e riprova.');return;}
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'landscape',unit:'pt',format:'a3',compress:true});
+  const pageW=doc.internal.pageSize.getWidth();
+  const margin=24;
+  doc.setFont('helvetica','bold'); doc.setFontSize(15); doc.setTextColor(24,34,53); doc.text(title,margin,28);
+  doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(104,115,134); doc.text('Giacenza Dashboard '+DASHBOARD_VERSION+' | Esportato il '+new Date().toLocaleString('it-IT'),margin,42);
+  const body=m.body.concat(m.foot||[]);
+  const footStart=m.body.length;
+  doc.autoTable({
+    head:m.head,
+    body,
+    startY:54,
+    margin:{left:margin,right:margin,top:36,bottom:24},
+    theme:'grid',
+    tableWidth:'auto',
+    styles:{font:'helvetica',fontSize:7,cellPadding:2.8,overflow:'linebreak',halign:'right',valign:'middle',lineColor:[221,229,241],lineWidth:.35,textColor:[24,34,53],minCellHeight:13},
+    headStyles:{fillColor:[248,251,255],textColor:[77,90,109],fontStyle:'bold',halign:'center',fontSize:6.9,cellPadding:3,minCellHeight:15},
+    alternateRowStyles:{fillColor:[255,255,255]},
+    columnStyles:{0:{halign:'left',fontStyle:'bold',cellWidth:88}},
+    didParseCell:function(data){
+      if(data.section==='body' && data.row.index>=footStart){data.cell.styles.fillColor=[252,253,255];data.cell.styles.fontStyle='bold';data.cell.styles.lineWidth=.6;}
+      const txt=String(data.cell.raw||'');
+      if(/^-/.test(txt)||txt.includes('-')) data.cell.styles.textColor=[220,38,38];
+      if(/^\+/.test(txt)) data.cell.styles.textColor=[15,159,110];
+    },
+    didDrawPage:function(){
+      const pn=doc.internal.getNumberOfPages();
+      doc.setFontSize(7);doc.setTextColor(104,115,134);doc.text('Pagina '+pn,pageW-margin,doc.internal.pageSize.getHeight()-10,{align:'right'});
+    },
+    horizontalPageBreak:true,
+    horizontalPageBreakRepeat:0
+  });
+  doc.save(filename.endsWith('.pdf')?filename:filename+'.pdf');
+}
+function resetFilters(){searchState.lastKey='';clearTimeout(searchState.timer);filterIds.forEach(id=>{const el=$(id);if(el)[...el.options].forEach(o=>o.selected=false);});state.districtDefaultApplied=false;$('metricFilter').value=[...$('metricFilter').options].some(o=>o.value==='VEN AC')?'VEN AC':'VEN AC';$('itemTableSearch').value='';$('themeTableSearch').value='';if($('districtDetailTableSearch'))$('districtDetailTableSearch').value='';if($('districtDetailCategoryFilter'))[...$('districtDetailCategoryFilter').options].forEach(o=>o.selected=false);if($('districtDetailThemeFilter'))[...$('districtDetailThemeFilter').options].forEach(o=>o.selected=false);if($('gradeDetailTableSearch'))$('gradeDetailTableSearch').value='';if($('gradeDetailCategoryFilter'))[...$('gradeDetailCategoryFilter').options].forEach(o=>o.selected=false);if($('gradeDetailThemeFilter'))[...$('gradeDetailThemeFilter').options].forEach(o=>o.selected=false);Object.keys(ATTR_DETAIL_CONFIG).forEach(p=>{if($(p+'TableSearch'))$(p+'TableSearch').value='';if($(p+'CategoryFilter'))[...$(p+'CategoryFilter').options].forEach(o=>o.selected=false);if($(p+'ThemeFilter'))[...$(p+'ThemeFilter').options].forEach(o=>o.selected=false);});if($('storeDetailTableSearch'))$('storeDetailTableSearch').value='';if($('storeDetailCategoryFilter'))[...$('storeDetailCategoryFilter').options].forEach(o=>o.selected=false);if($('storeDetailThemeFilter'))[...$('storeDetailThemeFilter').options].forEach(o=>o.selected=false);if($('storeTableSearch'))$('storeTableSearch').value='';state.filtersReady=false;renderAll();}
+
+function setupFilterToggle(){const btn=$('toggleFilters'),box=$('mainFilters');if(!btn||!box)return;btn.addEventListener('click',()=>{const hidden=box.classList.toggle('filters-hidden');btn.textContent=hidden?'👁 Mostra filtri':'👁 Nascondi filtri';});}
+setupFilterToggle();
+setupDrop('stockDropzone','stockFileInput',handleStock,{rename:true});setupDrop('dbDropzone','dbFileInput',handleDb,{rename:false});
+$('stockDriveSelect').addEventListener('change',()=>handleDriveSelectChange('GIACENZA','stockDriveSelect','stockStatus',handleStock));$('dbDriveSelect').addEventListener('change',()=>handleDriveSelectChange('DBINFO','dbDriveSelect','dbStatus',handleDb));
+
+const storeDd=$('storeDropdown');
+const storeBtn=$('storeDropdownButton');
+if(storeBtn&&storeDd){storeBtn.addEventListener('click',e=>{e.preventDefault();storeDd.classList.toggle('open');if(storeDd.classList.contains('open')){$('storeMultiSearch').focus();renderStoreCheckboxes($('storeMultiSearch').value);}});document.addEventListener('click',e=>{if(!storeDd.contains(e.target))storeDd.classList.remove('open');});$('storeMultiSearch').addEventListener('input',e=>renderStoreCheckboxes(e.target.value));}
+const districtDd=$('districtDropdown');
+const districtBtn=$('districtDropdownButton');
+if(districtBtn&&districtDd){districtBtn.addEventListener('click',e=>{e.preventDefault();districtDd.classList.toggle('open');if(districtDd.classList.contains('open')){$('districtSearch').focus();renderDistrictCheckboxes($('districtSearch').value);}});document.addEventListener('click',e=>{if(!districtDd.contains(e.target))districtDd.classList.remove('open');});$('districtSearch').addEventListener('input',e=>renderDistrictCheckboxes(e.target.value));}
+Object.keys(MAIN_MULTI_FILTER_META).forEach(setupMainFilterDropdown);
+$('metricFilter').addEventListener('change',renderAll);filterIds.forEach(id=>{const el=$(id);if(el)el.addEventListener('change',scheduleFilterRender);});function setupStoreDetailInternalDropdown(dropId,btnId,searchId,type){const dd=$(dropId),btn=$(btnId),search=$(searchId);if(!dd||!btn||!search)return;const prefix=String(dropId);const base=dropId.replace(/(Category|Theme)Dropdown$/,'');const renderFn=prefix.startsWith('districtDetail')?renderDistrictDetailMultiCheckboxes:(prefix.startsWith('gradeDetail')?renderGradeDetailMultiCheckboxes:(ATTR_DETAIL_CONFIG[base]?((type,search)=>renderAttrDetailMultiCheckboxes(base,type,search)):renderStoreDetailMultiCheckboxes));btn.addEventListener('click',e=>{e.preventDefault();dd.classList.toggle('open');if(dd.classList.contains('open')){search.focus();renderFn(type,search.value);}});document.addEventListener('click',e=>{if(!dd.contains(e.target))dd.classList.remove('open');});search.addEventListener('input',e=>renderFn(type,e.target.value));}
+setupStoreDetailInternalDropdown('districtDetailCategoryDropdown','districtDetailCategoryDropdownButton','districtDetailCategorySearch','category');
+setupStoreDetailInternalDropdown('districtDetailThemeDropdown','districtDetailThemeDropdownButton','districtDetailThemeSearch','theme');
+setupStoreDetailInternalDropdown('gradeDetailCategoryDropdown','gradeDetailCategoryDropdownButton','gradeDetailCategorySearch','category');
+setupStoreDetailInternalDropdown('gradeDetailThemeDropdown','gradeDetailThemeDropdownButton','gradeDetailThemeSearch','theme');
+Object.keys(ATTR_DETAIL_CONFIG).forEach(p=>{setupStoreDetailInternalDropdown(p+'CategoryDropdown',p+'CategoryDropdownButton',p+'CategorySearch','category');setupStoreDetailInternalDropdown(p+'ThemeDropdown',p+'ThemeDropdownButton',p+'ThemeSearch','theme');});
+setupStoreDetailInternalDropdown('storeDetailCategoryDropdown','storeDetailCategoryDropdownButton','storeDetailCategorySearch','category');
+setupStoreDetailInternalDropdown('storeDetailThemeDropdown','storeDetailThemeDropdownButton','storeDetailThemeSearch','theme');SEARCH_INPUT_IDS.forEach(id=>{const el=$(id);if(el)el.addEventListener('input',scheduleManualSearchRender);});$('resetFilters').addEventListener('click',resetFilters);
+document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));btn.classList.add('active');$(btn.dataset.page).classList.add('active');}));
+$('exportDistrictDetailExcel').addEventListener('click',()=>exportTableExcel('districtDetailTable','Dettaglio distretti','dettaglio_distretti_giacenza.xls'));
+$('exportDistrictDetailPdf').addEventListener('click',()=>exportTablePdf('districtDetailTable','Dettaglio distretti','dettaglio_distretti_giacenza.pdf'));
+$('exportGradeDetailExcel').addEventListener('click',()=>exportTableExcel('gradeDetailTable','Grade','grade_giacenza.xls'));
+$('exportGradeDetailPdf').addEventListener('click',()=>exportTablePdf('gradeDetailTable','Grade','grade_giacenza.pdf'));
+$('exportTipoDetailExcel').addEventListener('click',()=>exportTableExcel('tipoDetailTable','Tipo','tipo_giacenza.xls'));
+$('exportTipoDetailPdf').addEventListener('click',()=>exportTablePdf('tipoDetailTable','Tipo','tipo_giacenza.pdf'));
+$('exportSfsDetailExcel').addEventListener('click',()=>exportTableExcel('sfsDetailTable','SFS','sfs_giacenza.xls'));
+$('exportSfsDetailPdf').addEventListener('click',()=>exportTablePdf('sfsDetailTable','SFS','sfs_giacenza.pdf'));
+$('exportRankingDetailExcel').addEventListener('click',()=>exportTableExcel('rankingDetailTable','Ranking','ranking_giacenza.xls'));
+$('exportRankingDetailPdf').addEventListener('click',()=>exportTablePdf('rankingDetailTable','Ranking','ranking_giacenza.pdf'));
+$('exportRatingCcDetailExcel').addEventListener('click',()=>exportTableExcel('ratingCcDetailTable','Rating CC','rating_cc_giacenza.xls'));
+$('exportRatingCcDetailPdf').addEventListener('click',()=>exportTablePdf('ratingCcDetailTable','Rating CC','rating_cc_giacenza.pdf'));
+$('exportTestDetailExcel').addEventListener('click',()=>exportTableExcel('testDetailTable','TEST','test_giacenza.xls'));
+$('exportTestDetailPdf').addEventListener('click',()=>exportTablePdf('testDetailTable','TEST','test_giacenza.pdf'));
+$('exportRegioneDetailExcel').addEventListener('click',()=>exportTableExcel('regioneDetailTable','Regione','regione_giacenza.xls'));
+$('exportRegioneDetailPdf').addEventListener('click',()=>exportTablePdf('regioneDetailTable','Regione','regione_giacenza.pdf'));
+$('exportStoreDetailExcel').addEventListener('click',()=>exportTableExcel('storeDetailTable','Dettaglio negozi','dettaglio_negozi_giacenza.xls'));
+$('exportStoreDetailPdf').addEventListener('click',()=>exportTablePdf('storeDetailTable','Dettaglio negozi','dettaglio_negozi_giacenza.pdf'));
+$('exportItemsExcel').addEventListener('click',()=>exportTableExcel('itemsTable','Dettaglio categoria','dettaglio_categoria_giacenza.xls'));
+$('exportItemsPdf').addEventListener('click',()=>exportTablePdf('itemsTable','Dettaglio categoria','dettaglio_categoria_giacenza.pdf'));
+$('exportPeriodExcel').addEventListener('click',()=>exportTableExcel('periodTable','Analisi periodo - categoria','analisi_periodo_categoria_giacenza.xls'));
+$('exportPeriodPdf').addEventListener('click',()=>exportTablePdf('periodTable','Analisi periodo - categoria','analisi_periodo_categoria_giacenza.pdf'));
+$('exportPeriodThemeExcel').addEventListener('click',()=>exportTableExcel('periodThemeTable','Analisi periodo - Tema','analisi_periodo_tema_giacenza.xls'));
+$('exportPeriodThemePdf').addEventListener('click',()=>exportTablePdf('periodThemeTable','Analisi periodo - Tema','analisi_periodo_tema_giacenza.pdf'));
+$('exportThemesExcel').addEventListener('click',()=>exportTableExcel('themeTable','Dettaglio temi','dettaglio_temi_giacenza.xls'));
+$('exportThemesPdf').addEventListener('click',()=>exportTablePdf('themeTable','Dettaglio temi','dettaglio_temi_giacenza.pdf'));
+const exportStoresBtn=$('exportStoresCsv');if(exportStoresBtn)exportStoresBtn.addEventListener('click',()=>exportCsv(aggregateStores(filteredRecords()),'dettaglio_negozi_giacenza.csv'));
+buildFilters();renderAll();preloadLatestDriveFiles();
+</script>
+</body>
+</html>
